@@ -1,0 +1,7 @@
+1 - Bobe Construtor
+2 - CACHORRO
+3 - MACHO
+4 - Rua do fulano, 9, Natal
+5 - 14 anos
+6 - 10kg
+7 - Viralata
