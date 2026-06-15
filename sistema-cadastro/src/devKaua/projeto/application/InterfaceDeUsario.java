@@ -1,8 +1,12 @@
 package devKaua.projeto.application;
 
+import devKaua.projeto.domain.CriterioFiltro;
 import devKaua.projeto.domain.Pet;
+import devKaua.projeto.domain.Sexo;
+import devKaua.projeto.domain.TipoAnimal;
 
 import java.util.List;
+import java.util.Map;
 
 public interface InterfaceDeUsario {
     int selecionarOpcao();
@@ -15,8 +19,6 @@ public interface InterfaceDeUsario {
     String solicitarIdade();
     String solicitarPeso();
     String[] solicitarEndereco();
-
-    int solicitarConfirmacaoSimNao();
 
     int numeroPetListFiltrada();
     String confirmacaoDeletarPet(Pet pet);
@@ -32,9 +34,11 @@ public interface InterfaceDeUsario {
 
     void errorExibir(String mensagem);
 
-    int solicitarOpcaoFiltro();
+    CriterioFiltro solicitarCriterioFiltro();
 
     String solicitarTextoBusca();
+
+    Sexo solicitarSexoParaFiltro();
 
     void exibirListaPets(List<Pet> listaAtual);
 
@@ -42,5 +46,13 @@ public interface InterfaceDeUsario {
 
     void erroSalvarObjPet();
 
-    int consultaCachorroOuGato();
+    TipoAnimal solicitarTipoAnimalParaConsulta();
+
+    void leituraFormulario();
+
+    int solicitarAcaoGerenciamentoCriterios(Map<CriterioFiltro, String> criterios);
+
+    CriterioFiltro solicitarCriterioParaRemover(Map<CriterioFiltro, String> criterios);
+
+    TipoAnimal solicitarTipoAnimalParaFiltro();
 }

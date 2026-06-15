@@ -1,10 +1,10 @@
 package devKaua.projeto.application;
-
 public class MenuPrincipal {
-    private final InterfaceUsarioCLI ui;
+
+    private final InterfaceDeUsario ui;
     private final PetService service;
 
-    public MenuPrincipal(InterfaceUsarioCLI ui, PetServiceClass service) {
+    public MenuPrincipal(InterfaceDeUsario ui, PetService service) {
         this.ui = ui;
         this.service = service;
     }
@@ -12,40 +12,40 @@ public class MenuPrincipal {
     public void run() {
         boolean sairTrue = true;
         while (sairTrue) {
-            getUi().printMenuPrincipal();
-            int opcao = getUi().selecionarOpcao();
+            ui().printMenuPrincipal();
+            int opcao = ui().selecionarOpcao();
             switch (opcao) {
                 case 1:
-                    getUi().leituraFormulario();
+                    ui().leituraFormulario();
                     try {
-                        getService().cadastrar();
+                        service().cadastrar();
                     } catch (RuntimeException e) {
-                        getUi().errorExibir(e.getMessage());
+                        ui().errorExibir(e.getMessage());
                     }
                     break;
                 case 2:
                     try {
-                        getService().listarPetsPorCriterio();
+                        service().listarPetsPorCriterio();
                     } catch (RuntimeException e) {
-                        getUi().errorExibir(e.getMessage());
+                        ui().errorExibir(e.getMessage());
                     }
                     break;
                 case 3:
                     try {
-                        getService().alterar();
+                        service().alterar();
                     } catch (RuntimeException e) {
-                        getUi().errorExibir(e.getMessage());
+                        ui().errorExibir(e.getMessage());
                     }
                     break;
                 case 4:
                     try {
-                        getService().remover();
+                        service().remover();
                     } catch (RuntimeException e) {
-                        getUi().errorExibir(e.getMessage());
+                        ui().errorExibir(e.getMessage());
                     }
                     break;
                 case 5:
-                    getService().listarPetsCompleta();
+                    service().listarPetsCompleta();
                     break;
                 case 6:
                     sairTrue = false;
@@ -54,11 +54,11 @@ public class MenuPrincipal {
         }
     }
 
-    private InterfaceUsarioCLI getUi() {
+    private InterfaceDeUsario ui() {
         return ui;
     }
 
-    private PetService getService() {
+    private PetService service() {
         return service;
     }
 }

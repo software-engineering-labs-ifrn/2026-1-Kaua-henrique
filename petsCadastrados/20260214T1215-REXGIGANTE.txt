@@ -1,3 +1,4 @@
+ID - 6
 1 - Rex Gigante
 2 - CACHORRO
 3 - MACHO

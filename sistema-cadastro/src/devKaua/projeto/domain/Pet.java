@@ -5,24 +5,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Pet {
-    private static final AtomicLong idGenerator = new AtomicLong(1);
-    private Long ID;
 
+    private static final AtomicLong idGenerator = new AtomicLong(1);
+
+    public static final String SEM_DADOS = "NÃO INFORMADO";
+
+    private final Long id;
     private String nome;
-    private Endereco endereco;
-    private Sexo sexo;
-    private TipoAnimal tipoAnimal;
+    private final Endereco endereco;
+    private final Sexo sexo;
+    private final TipoAnimal tipoAnimal;
     private String idade;
     private String peso;
     private String raca;
-    public static final String SEM_DADOS = "NÃO INFORMADO";
 
-    public Pet(Long id, String nome, Endereco endereco, Sexo sexo, TipoAnimal tipoAnimal, String idade, String peso, String raca) {
+    public Pet(Long id, String nome, Endereco endereco, Sexo sexo,
+               TipoAnimal tipoAnimal, String idade, String peso, String raca) {
         if (id == null) {
-            this.ID = idGenerator.getAndIncrement();
-        } else {
-            this.ID = id;
+            throw new IllegalArgumentException("ID é obrigatório para reconstituição.");
         }
+        this.id = id;
         setNome(nome);
         setIdade(idade);
         setPeso(peso);
@@ -32,15 +34,107 @@ public class Pet {
         this.tipoAnimal = tipoAnimal;
     }
 
-    public Pet() {
-        this.ID = idGenerator.getAndIncrement();
+    // --- Construtor privado para o Factory Method ---
+    private Pet(String nome, Endereco endereco, Sexo sexo,
+                TipoAnimal tipoAnimal, String idade, String peso, String raca) {
+        this.id = idGenerator.getAndIncrement();
+        setNome(nome);
+        setIdade(idade);
+        setPeso(peso);
+        setRaca(raca);
+        this.endereco = endereco;
+        this.sexo = sexo;
+        this.tipoAnimal = tipoAnimal;
     }
 
-    @Override
-    public String toString() {
-        return (". " + getID() + " - " + getNome() + " - " + getEndereco().toString() + " - " + getTipoAnimal() + " - "
-                + getSexo() + " - " + getIdade() + " anos - " + getPeso() + "kg - " + getRaca()
-        );
+    public static Pet criar(String nome, Endereco endereco, Sexo sexo,
+                            TipoAnimal tipoAnimal, String idade, String peso, String raca) {
+        return new Pet(nome, endereco, sexo, tipoAnimal, idade, peso, raca);
+    }
+
+    public void alterarNome(String nome) {
+        setNome(nome);
+    }
+
+    public void alterarIdade(String idade) {
+        setIdade(idade);
+    }
+
+    public void alterarPeso(String peso) {
+        setPeso(peso);
+    }
+
+    public void alterarRaca(String raca) {
+        setRaca(raca);
+    }
+
+    private void setNome(String nome) {
+        if (nome == null || nome.isEmpty()) {
+            this.nome = SEM_DADOS;
+            return;
+        }
+        String regexNome = "[A-Za-z]+(\\s)+[A-Za-z]+(\\s+|$)";
+        Pattern regraNome = Pattern.compile(regexNome);
+        Matcher condicionalNome = regraNome.matcher(nome);
+        if (!condicionalNome.find()) {
+            throw new IllegalArgumentException("Nome inválido! Use apenas letras e espaço.");
+        }
+        this.nome = nome;
+    }
+
+    private void setIdade(String idade) {
+        if (idade == null || idade.isEmpty()) {
+            this.idade = SEM_DADOS;
+            return;
+        }
+        String regexIdadePeso = "[0-9]+((\\\\.|,)[0-9]+)?";
+        Pattern regraIdadePeso = Pattern.compile(regexIdadePeso);
+        Matcher condicionalIdade = regraIdadePeso.matcher(idade);
+        if (Double.parseDouble(idade) > 60 || !condicionalIdade.find()) {
+            throw new IllegalArgumentException("Idade inválida! Escreva apenas números entre 0.1 Anos até 60 anos.");
+        }
+        this.idade = idade;
+    }
+
+    private void setPeso(String peso) {
+        if (peso == null || peso.isEmpty()) {
+            this.peso = SEM_DADOS;
+            return;
+        }
+        String pesoPet = peso.replace(',', '.');
+        String regexPeso = "[0-9]+((\\\\.|,)[0-9]+)?";
+        Pattern regraPeso = Pattern.compile(regexPeso);
+        Matcher condicionalPeso = regraPeso.matcher(pesoPet);
+        if (Double.parseDouble(pesoPet) > 60 || Double.parseDouble(pesoPet) < 0.5 || !condicionalPeso.find()) {
+            throw new IllegalArgumentException("Peso inválido! Escreva apenas números entre 0.5kl até 60kl.");
+        }
+        this.peso = peso;
+    }
+
+    private void setRaca(String raca) {
+        if (raca == null || raca.isEmpty()) {
+            this.raca = SEM_DADOS;
+            return;
+        }
+        String regexRaca = "[a-z,A-Z]+";
+        Pattern regraRaca = Pattern.compile(regexRaca);
+        Matcher condicionalRaca = regraRaca.matcher(raca);
+        if (!condicionalRaca.find()) {
+            throw new IllegalArgumentException("Raça inválida! Escreva apenas letras.");
+        }
+        this.raca = raca;
+    }
+
+    public Long getID() {
+        return id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public Endereco getEndereco() {
+        return endereco;
     }
 
     public Sexo getSexo() {
@@ -63,79 +157,16 @@ public class Pet {
         return raca;
     }
 
-    public String getNome() {
-        return nome;
-    }
-
-    public Endereco getEndereco() {
-        return endereco;
-    }
-
-    public void setNome(String nome) {
-        if (nome.isEmpty()) {
-            this.nome = SEM_DADOS;
-            return;
-        }
-
-        String regexNome = "[A-Za-z]+(\\s)+[A-Za-z]+(\\s+|$)";
-        Pattern regraNome = Pattern.compile(regexNome);
-        Matcher condicionalNome = regraNome.matcher(nome);
-        if (!condicionalNome.find()) {
-            throw new IllegalArgumentException("Nome inválido! Use apenas letras e espaço.");
-        }
-        this.nome = nome;
-    }
-
-    public void setIdade(String idade) {
-        if (idade.isEmpty()) {
-            this.idade = SEM_DADOS;
-            return;
-        }
-        String regexIdadePeso = "[0-9]+((\\\\.|,)[0-9]+)?";
-        Pattern regraIdadePeso = Pattern.compile(regexIdadePeso);
-        Matcher condicionalIdade = regraIdadePeso.matcher(idade);
-        if (Double.parseDouble(idade) > 60 || !condicionalIdade.find()) {
-            throw new IllegalArgumentException("Idade inválida! Escreva apenas números entre 0.1 Anos até 60 anos.");
-        }
-        this.idade = idade;
-    }
-
-    public void setPeso(String peso) {
-        if (peso.isEmpty()) {
-            this.peso = SEM_DADOS;
-            return;
-        }
-        String pesoPet = peso.replace(',', '.');
-        String regexPeso = "[0-9]+((\\\\.|,)[0-9]+)?";
-        Pattern regraPeso = Pattern.compile(regexPeso);
-        Matcher condicionalPeso = regraPeso.matcher(pesoPet);
-        if (Double.parseDouble(pesoPet) > 60 || Double.parseDouble(pesoPet) < 0.5 || !condicionalPeso.find()) {
-            throw new IllegalArgumentException("Peso inválido! Escreva apenas números entre 0.5kl até 60kl.");
-        }
-        this.peso = peso;
-    }
-
-    public void setRaca(String raca) {
-        if (raca.isEmpty()) {
-            this.raca = SEM_DADOS;
-            return;
-        }
-        String regexRaca = "[a-z,A-Z]+";
-        Pattern regraRaca = Pattern.compile(regexRaca);
-        Matcher condicionalRaca = regraRaca.matcher(raca);
-        if (!condicionalRaca.find()) {
-            throw new IllegalArgumentException("Raça inválida! Escreva apenas letras.");
-        }
-        this.raca = raca;
-    }
-
     public static void atualizarGerador(Long maiorIdEncontrado) {
         if (maiorIdEncontrado >= idGenerator.get()) {
             idGenerator.set(maiorIdEncontrado + 1);
         }
     }
 
-    public Long getID() {
-        return ID;
+    @Override
+    public String toString() {
+        return ". " + getID() + " - " + getNome() + " - " + getEndereco().toString()
+                + " - " + getTipoAnimal() + " - " + getSexo() + " - " + getIdade()
+                + " anos - " + getPeso() + "kg - " + getRaca();
     }
 }
