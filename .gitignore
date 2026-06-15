@@ -1,0 +1,12 @@
+# Ignorar compilações do Java e ferramentas de build
+target/
+build/
+.gradle/
+out/
+*.class
+
+# Ignorar configurações do IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
