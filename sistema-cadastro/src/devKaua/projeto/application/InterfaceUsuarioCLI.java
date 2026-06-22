@@ -1,20 +1,14 @@
 package devKaua.projeto.application;
 
-import devKaua.projeto.domain.CriterioFiltro;
-import devKaua.projeto.domain.Pet;
-import devKaua.projeto.domain.Sexo;
-import devKaua.projeto.domain.TipoAnimal;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class InterfaceUsarioCLI implements InterfaceDeUsario {
+public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
     private final Scanner scanner = new Scanner(System.in);
 
     @Override
@@ -103,9 +97,9 @@ public class InterfaceUsarioCLI implements InterfaceDeUsario {
     }
 
     @Override
-    public String confirmacaoDeletarPet(Pet pet) {
+    public String confirmacaoDeletarPet(String nomePet) {
         System.out.println("Digite apenas 'SIM ou NÃO'");
-        System.out.println("Tem certeza que deseja deletar '" + pet.getNome() + "' do sistema (SIM ou NÃO)? ");
+        System.out.println("Tem certeza que deseja deletar '" + nomePet + "' do sistema (SIM ou NÃO)? ");
         return this.scanner.nextLine();
     }
 
@@ -136,24 +130,14 @@ public class InterfaceUsarioCLI implements InterfaceDeUsario {
     }
 
     @Override
-    public CriterioFiltro solicitarCriterioFiltro() {
-        CriterioFiltro criterio = null;
-        while (criterio == null) {
-            System.out.println("---------------------------");
-            System.out.println("Escolha o critério de filtro:");
-            for (CriterioFiltro c : CriterioFiltro.values()) {
-                System.out.println("  " + c.valor() + " = " + c.descricao());
-            }
-            System.out.println("---------------------------");
-            try {
-                int opcao = this.scanner.nextInt();
-                this.scanner.nextLine();
-                criterio = CriterioFiltro.fromValor(opcao);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Opção inválida. Tente novamente.");
-            }
-        }
-        return criterio;
+    public int solicitarCriterioFiltro() {
+        System.out.println("---------------------------");
+        System.out.println("Escolha o critério de filtro:");
+        System.out.println("  1 = Nome ou Sobrenome\n  2 = Idade\n  3 = Raça\n  4 = Peso\n  5 = Sexo\n  6 = Cidade\n  7 = Tipo do animal");
+        System.out.println("---------------------------");
+        int opcao = this.scanner.nextInt();
+        this.scanner.nextLine();
+        return opcao;
     }
 
     @Override
@@ -163,34 +147,24 @@ public class InterfaceUsarioCLI implements InterfaceDeUsario {
     }
 
     @Override
-    public Sexo solicitarSexoParaFiltro() {
-        Sexo sexo = null;
-        while (sexo == null) {
-            System.out.println("Escolha o sexo para filtrar:");
-            for (Sexo s : Sexo.values()) {
-                System.out.println("  " + s.valor() + " = " + s.tipo());
-            }
-            try {
-                int opcao = this.scanner.nextInt();
-                this.scanner.nextLine();
-                sexo = Sexo.fromValor(opcao);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Opção inválida. Tente novamente.");
-            }
-        }
-        return sexo;
+    public int solicitarSexoParaFiltro() {
+        System.out.println("Escolha o sexo para filtrar:");
+        System.out.println("  1 = Macho\n  2 = Fêmea");
+        int opcao = this.scanner.nextInt();
+        this.scanner.nextLine();
+        return opcao;
     }
 
     @Override
-    public int solicitarAcaoGerenciamentoCriterios(Map<CriterioFiltro, String> criterios) {
+    public int solicitarAcaoGerenciamentoCriterios(Map<String, String> criterios) {
         System.out.println("===========================");
         if (criterios.isEmpty()) {
             System.out.println("Nenhum critério aplicado ainda.");
         } else {
             System.out.println("Critérios aplicados:");
             int i = 1;
-            for (Map.Entry<CriterioFiltro, String> entry : criterios.entrySet()) {
-                System.out.println("  " + i + ". " + entry.getKey().descricao() + " = " + entry.getValue());
+            for (Map.Entry<String, String> entry : criterios.entrySet()) {
+                System.out.println("  " + i + ". " + entry.getKey() + " = " + entry.getValue());
                 i++;
             }
         }
@@ -213,36 +187,24 @@ public class InterfaceUsarioCLI implements InterfaceDeUsario {
     }
 
     @Override
-    public CriterioFiltro solicitarCriterioParaRemover(Map<CriterioFiltro, String> criterios) {
-        List<CriterioFiltro> chaves = new ArrayList<>(criterios.keySet());
+    public int solicitarCriterioParaRemover(List<String> descricoesCriterios) {
         System.out.println("Qual critério deseja remover?");
-        for (int i = 0; i < chaves.size(); i++) {
-            CriterioFiltro c = chaves.get(i);
-            System.out.println("  " + (i + 1) + ". " + c.descricao() + " = " + criterios.get(c));
+        for (int i = 0; i < descricoesCriterios.size(); i++) {
+            System.out.println("  " + (i + 1) + ". " + descricoesCriterios.get(i));
         }
-
-        int indice;
-        do {
-            indice = this.scanner.nextInt();
-            this.scanner.nextLine();
-        } while (indice < 1 || indice > chaves.size());
-
-        return chaves.get(indice - 1);
+        int indice = this.scanner.nextInt();
+        this.scanner.nextLine();
+        return indice;
     }
 
     @Override
-    public void exibirListaPets(List<Pet> listaAtual) {
-        StringBuilder builder = new StringBuilder();
-        int contador = 0;
-        for (Pet pet : listaAtual) {
-            builder.append(++contador).append(" - ").append(pet.toString()).append("\n");
-        }
-        System.out.println("Pets Cadastrados com base na sua consulta: \n" + builder);
+    public void exibirListaPets(String listaFormatada) {
+        System.out.println("Pets Cadastrados com base na sua consulta: \n" + listaFormatada);
     }
 
     @Override
-    public void exibirPet(Pet pet) {
-        System.out.println(pet.toString());
+    public void exibirPet(String petTexto) {
+        System.out.println(petTexto);
     }
 
     @Override
@@ -262,40 +224,21 @@ public class InterfaceUsarioCLI implements InterfaceDeUsario {
     }
 
     @Override
-    public TipoAnimal solicitarTipoAnimalParaConsulta() {
-        TipoAnimal tipo = null;
-        while (tipo == null) {
-            System.out.println("Escolha o tipo de animal:");
-            System.out.println("  1 = Cachorro");
-            System.out.println("  2 = Gato");
-            try {
-                int resposta = this.scanner.nextInt();
-                this.scanner.nextLine();
-                tipo = TipoAnimal.fromValor(resposta);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Opção inválida. Tente novamente.");
-            }
-        }
-        return tipo;
+    public int solicitarTipoAnimalParaConsulta() {
+        System.out.println("Escolha o tipo de animal:");
+        System.out.println("  1 = Cachorro\n  2 = Gato");
+        int resposta = this.scanner.nextInt();
+        this.scanner.nextLine();
+        return resposta;
     }
 
     @Override
-    public TipoAnimal solicitarTipoAnimalParaFiltro() {
-        TipoAnimal tipo = null;
-        while (tipo == null) {
-            System.out.println("Escolha o tipo de animal para filtrar:");
-            for (TipoAnimal t : TipoAnimal.values()) {
-                System.out.println("  " + t.valor() + " = " + t.animal());
-            }
-            try {
-                int resposta = this.scanner.nextInt();
-                this.scanner.nextLine();
-                tipo = TipoAnimal.fromValor(resposta);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Opção inválida. Tente novamente.");
-            }
-        }
-        return tipo;
+    public int solicitarTipoAnimalParaFiltro() {
+        System.out.println("Escolha o tipo de animal para filtrar:");
+        System.out.println("  1 = Cachorro\n  2 = Gato");
+        int resposta = this.scanner.nextInt();
+        this.scanner.nextLine();
+        return resposta;
     }
 
     @Override

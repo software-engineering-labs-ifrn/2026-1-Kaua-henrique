@@ -1,268 +1,135 @@
 package devKaua.projeto.application;
 
 import devKaua.projeto.domain.*;
-
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class PetService {
-
     private final PetFiltro petFiltro;
-    private final InterfaceDeUsario ui;
     private final PetRepository repository;
 
-    public PetService(InterfaceDeUsario ui, PetRepository repository) {
-        this.ui = ui;
+    private final Map<CriterioFiltro, String> criteriosAtivos = new LinkedHashMap<>();
+
+    public PetService(PetRepository repository) {
         this.repository = repository;
         this.petFiltro = new PetFiltro();
     }
 
-    private PetRepository repository() {
-        return repository;
+    public String cadastrar(int tipoPetInt, int sexoPetInt, String[] endArr,
+                            String nome, String raca, String idade, String peso) {
+        try {
+            TipoAnimal tipo = TipoAnimal.fromValor(tipoPetInt);
+            Sexo sexo = Sexo.fromValor(sexoPetInt);
+            Endereco endereco = new Endereco(endArr[0], endArr[1], endArr[2]);
+
+            Pet novoPet = Pet.criar(nome, endereco, sexo, tipo, idade, peso, raca);
+            repository.salvar(novoPet);
+            return "SUCESSO";
+        } catch (IllegalArgumentException e) {
+            return "ERRO";
+        }
     }
 
-    private InterfaceDeUsario ui() {
-        return ui;
+    public void limparCriterios() {
+        this.criteriosAtivos.clear();
     }
 
-    public void cadastrar() {
-        Pet novoPet = null;
+    public Map<String, String> obterCriteriosParaExibicao() {
+        Map<String, String> exibicao = new LinkedHashMap<>();
+        for (Map.Entry<CriterioFiltro, String> entry : criteriosAtivos.entrySet()) {
+            exibicao.put(entry.getKey().descricao(), entry.getValue());
+        }
+        return exibicao;
+    }
 
-        while (novoPet == null) {
-            try {
-                int tipoPetInt = ui().solicitarTipo();
-                TipoAnimal tipoPet = TipoAnimal.fromValor(tipoPetInt);
+    public void adicionarCriterio(int opcaoCrit, String valorRaw) {
+        CriterioFiltro crit = CriterioFiltro.fromValor(opcaoCrit);
+        String valorFinal = valorRaw;
 
-                int sexoPetInt = ui().solicitarSexo();
-                Sexo sexoPet = Sexo.fromValor(sexoPetInt);
+        if (crit == CriterioFiltro.SEXO) {
+            valorFinal = Sexo.fromValor(Integer.parseInt(valorRaw)).tipo();
+        } else if (crit == CriterioFiltro.TIPO) {
+            valorFinal = TipoAnimal.fromValor(Integer.parseInt(valorRaw)).animal();
+        }
 
-                String[] enderecoPetU = ui().solicitarEndereco();
-                Endereco enderecoPet = new Endereco(enderecoPetU[0], enderecoPetU[1], enderecoPetU[2]);
+        criteriosAtivos.put(crit, valorFinal);
+    }
 
-                String nomePet = ui().solicitarNome();
-                String racaPet = ui().solicitarRaca();
-                String idadePet = ui().solicitarIdade();
-                String pesoPet = ui().solicitarPeso();
+    public List<String> obterDescricoesCriteriosAtivos() {
+        List<String> descricoes = new ArrayList<>();
+        for (Map.Entry<CriterioFiltro, String> entry : criteriosAtivos.entrySet()) {
+            descricoes.add(entry.getKey().descricao() + " = " + entry.getValue());
+        }
+        return descricoes;
+    }
 
-                novoPet = Pet.criar(nomePet, enderecoPet, sexoPet, tipoPet, idadePet, pesoPet, racaPet);
-            } catch (IllegalArgumentException e) {
-                ui().erroSalvarObjPet();
+    public void removerCriterioPorIndice(int indiceBaseUm) {
+        List<CriterioFiltro> chaves = new ArrayList<>(criteriosAtivos.keySet());
+        if (indiceBaseUm > 0 && indiceBaseUm <= chaves.size()) {
+            criteriosAtivos.remove(chaves.get(indiceBaseUm - 1));
+        }
+    }
+
+    public String executarBuscaComCriteriosAtuais() {
+        List<Pet> base = repository.listarTodos();
+        List<Pet> resultado = criteriosAtivos.isEmpty() ? base : petFiltro.filtrar(base, criteriosAtivos);
+
+        if (resultado.isEmpty()) return "VAZIO";
+        return formatarListaParaTexto(resultado);
+    }
+
+    public String listarTodos() {
+        return formatarListaParaTexto(repository.listarTodos());
+    }
+
+    public String obterNomePet(int numeroPet) {
+        List<Pet> filtrados = obterListaFiltradaInterna();
+        if (numeroPet < 1 || numeroPet > filtrados.size()) return "INVALIDO";
+        return filtrados.get(numeroPet - 1).getNome();
+    }
+
+    public String alterarCampoPet(int numeroPet, int opcaoCampo, String novoValor) {
+        List<Pet> filtrados = obterListaFiltradaInterna();
+        if (numeroPet < 1 || numeroPet > filtrados.size()) return "ERRO:Número do pet inválido.";
+
+        Pet pet = filtrados.get(numeroPet - 1);
+        try {
+            String linhaNova = "";
+            switch (opcaoCampo) {
+                case 1 -> { pet.alterarNome(novoValor); linhaNova = "1 - " + novoValor; }
+                case 2 -> { pet.alterarIdade(novoValor); linhaNova = "5 - " + novoValor + " anos"; }
+                case 3 -> { pet.alterarRaca(novoValor); linhaNova = "7 - " + novoValor; }
+                case 4 -> { pet.alterarPeso(novoValor); linhaNova = "6 - " + novoValor + "kg"; }
+                default -> { return "ERRO:Opção inválida."; }
             }
+            repository.atualizar(pet, linhaNova);
+            return "SUCESSO";
+        } catch (IllegalArgumentException e) {
+            return "ERRO:" + e.getMessage();
         }
-
-        repository().salvar(novoPet);
     }
 
-    public void alterar() {
-        List<Pet> listaParaAlteraPet = listarPetsPorCriterio();
-        if (listaParaAlteraPet.isEmpty()) {
-            return;
-        }
+    public String removerPet(int numeroPet) {
+        List<Pet> filtrados = obterListaFiltradaInterna();
+        if (numeroPet < 1 || numeroPet > filtrados.size()) return "ERRO";
 
-        int numeroPet = ui().numeroPetListFiltrada();
+        repository.deletar(filtrados.get(numeroPet - 1));
+        return "SUCESSO";
+    }
 
+    private List<Pet> obterListaFiltradaInterna() {
+        List<Pet> base = repository.listarTodos();
+        return criteriosAtivos.isEmpty() ? base : petFiltro.filtrar(base, criteriosAtivos);
+    }
+
+    private String formatarListaParaTexto(List<Pet> lista) {
+        StringBuilder builder = new StringBuilder();
         int contador = 0;
-        for (Pet pets : listaParaAlteraPet) {
-            contador++;
-            if (numeroPet == contador) {
-                int consultaDesejada;
-                do {
-                    consultaDesejada = ui().solicitarOpcaoAlterar();
-                } while (consultaDesejada < 1 || consultaDesejada > 4);
-
-                switch (consultaDesejada) {
-                    case 1:
-                        alterarCampoNome(pets);
-                        break;
-                    case 2:
-                        alterarCampoIdade(pets);
-                        break;
-                    case 3:
-                        alterarCampoRaca(pets);
-                        break;
-                    case 4:
-                        alterarCampoPeso(pets);
-                        break;
-                }
-            }
+        for (Pet pet : lista) {
+            builder.append(++contador).append(" - ").append(pet.toString()).append("\n");
         }
-    }
-
-    private void alterarCampoNome(Pet pet) {
-        boolean valido = false;
-        while (!valido) {
-            try {
-                String nomeNovo = ui().solicitarNome();
-                pet.alterarNome(nomeNovo);
-                String novoNomeTxt = "1 - " + nomeNovo;
-                boolean atualizado = repository().atualizar(pet, novoNomeTxt);
-                if (atualizado) {
-                    ui().exibirPet(pet);
-                    ui().exibirMensagemAlteracaoConcluida();
-                }
-                valido = true;
-            } catch (IllegalArgumentException e) {
-                ui().errorExibir(e.getMessage());
-            }
-        }
-    }
-
-    private void alterarCampoIdade(Pet pet) {
-        boolean valido = false;
-        while (!valido) {
-            try {
-                String idadeNovo = ui().solicitarIdade();
-                pet.alterarIdade(idadeNovo);
-                String novoIdadeTxt = "5 - " + idadeNovo + " anos";
-                boolean atualizado = repository().atualizar(pet, novoIdadeTxt);
-                if (atualizado) {
-                    ui().exibirPet(pet);
-                    ui().exibirMensagemAlteracaoConcluida();
-                }
-                valido = true;
-            } catch (IllegalArgumentException e) {
-                ui().errorExibir(e.getMessage());
-            }
-        }
-    }
-
-    private void alterarCampoRaca(Pet pet) {
-        boolean valido = false;
-        while (!valido) {
-            try {
-                String racaNovo = ui().solicitarRaca();
-                pet.alterarRaca(racaNovo);
-                String novoRacaTxt = "7 - " + racaNovo;
-                boolean atualizado = repository().atualizar(pet, novoRacaTxt);
-                if (atualizado) {
-                    ui().exibirPet(pet);
-                    ui().exibirMensagemAlteracaoConcluida();
-                }
-                valido = true;
-            } catch (IllegalArgumentException e) {
-                ui().errorExibir(e.getMessage());
-            }
-        }
-    }
-
-    private void alterarCampoPeso(Pet pet) {
-        boolean valido = false;
-        while (!valido) {
-            try {
-                String pesoNovo = ui().solicitarPeso();
-                pet.alterarPeso(pesoNovo);
-                String novoPesoTxt = "6 - " + pesoNovo + "kg";
-                boolean atualizado = repository().atualizar(pet, novoPesoTxt);
-                if (atualizado) {
-                    ui().exibirPet(pet);
-                    ui().exibirMensagemAlteracaoConcluida();
-                }
-                valido = true;
-            } catch (IllegalArgumentException e) {
-                ui().errorExibir(e.getMessage());
-            }
-        }
-    }
-
-    public void remover() {
-        List<Pet> listaParaDeletarPet = listarPetsPorCriterio();
-        if (listaParaDeletarPet.isEmpty()) {
-            return;
-        }
-
-        int numeroPet = ui().numeroPetListFiltrada();
-
-        int contador = 0;
-        String respostaDeletarPet;
-        for (Pet pet : listaParaDeletarPet) {
-            contador++;
-            if (numeroPet == contador) {
-                do {
-                    respostaDeletarPet = ui().confirmacaoDeletarPet(pet);
-                } while (!respostaDeletarPet.equalsIgnoreCase("SIM") && !respostaDeletarPet.equalsIgnoreCase("NÃO"));
-
-                if (respostaDeletarPet.equalsIgnoreCase("SIM")) {
-                    repository().deletar(pet);
-                    ui().mensagemDeletarPet();
-                } else {
-                    return;
-                }
-            }
-        }
-    }
-
-    public List<Pet> listarPetsPorCriterio() {
-        List<Pet> base = repository().listarTodos();
-
-        if (base.isEmpty()) {
-            ui().exibirMensagemErrorConsulta();
-            return base;
-        }
-
-        Map<CriterioFiltro, String> criterios = new LinkedHashMap<>();
-
-        while (true) {
-            int acao = ui().solicitarAcaoGerenciamentoCriterios(criterios);
-
-            switch (acao) {
-                case 1:
-                    adicionarCriterio(criterios);
-                    break;
-                case 2:
-                    removerCriterio(criterios);
-                    break;
-                case 3:
-                    return executarBusca(base, criterios);
-                case 4:
-                    return base;
-                default:
-                    break;
-            }
-        }
-    }
-
-    private void adicionarCriterio(Map<CriterioFiltro, String> criterios) {
-        CriterioFiltro criterio = ui().solicitarCriterioFiltro();
-
-        String valor;
-        if (criterio == CriterioFiltro.SEXO) {
-            Sexo sexo = ui().solicitarSexoParaFiltro();
-            valor = sexo.tipo();
-        } else if (criterio == CriterioFiltro.TIPO) {
-            TipoAnimal tipo = ui().solicitarTipoAnimalParaFiltro();
-            valor = tipo.animal();
-        } else {
-            valor = ui().solicitarTextoBusca();
-        }
-
-        criterios.put(criterio, valor);
-    }
-
-    private void removerCriterio(Map<CriterioFiltro, String> criterios) {
-        CriterioFiltro criterioParaRemover = ui().solicitarCriterioParaRemover(criterios);
-        criterios.remove(criterioParaRemover);
-    }
-
-    private List<Pet> executarBusca(List<Pet> baseLista, Map<CriterioFiltro, String> criterios) {
-        if (criterios.isEmpty()) {
-            // Sem critérios adicionais: exibe a lista base ao executar a busca explicitamente.
-            ui().exibirListaPets(baseLista);
-            return baseLista;
-        }
-
-        List<Pet> resultado = petFiltro.filtrar(baseLista, criterios);
-
-        if (resultado.isEmpty()) {
-            ui().exibirMensagemErrorConsulta();
-            return baseLista;
-        }
-
-        ui().exibirListaPets(resultado);
-        return resultado;
-    }
-
-    public void listarPetsCompleta() {
-        ui().exibirListaPets(repository().listarTodos());
+        return builder.toString();
     }
 }

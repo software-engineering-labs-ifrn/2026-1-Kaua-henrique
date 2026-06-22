@@ -1,64 +1,56 @@
 package devKaua.projeto.application;
+
 public class MenuPrincipal {
+    private final InterfaceDeUsuario ui;
+    private final PetFacade facade;
 
-    private final InterfaceDeUsario ui;
-    private final PetService service;
-
-    public MenuPrincipal(InterfaceDeUsario ui, PetService service) {
+    public MenuPrincipal(InterfaceDeUsuario ui, PetFacade facade) {
         this.ui = ui;
-        this.service = service;
+        this.facade = facade;
     }
 
     public void run() {
         boolean sairTrue = true;
         while (sairTrue) {
-            ui().printMenuPrincipal();
-            int opcao = ui().selecionarOpcao();
+            ui.printMenuPrincipal();
+            int opcao = ui.selecionarOpcao();
             switch (opcao) {
                 case 1:
-                    ui().leituraFormulario();
+                    ui.leituraFormulario();
                     try {
-                        service().cadastrar();
+                        facade.cadastrarPet();
                     } catch (RuntimeException e) {
-                        ui().errorExibir(e.getMessage());
+                        ui.errorExibir(e.getMessage());
                     }
                     break;
                 case 2:
                     try {
-                        service().listarPetsPorCriterio();
+                        facade.listarPetsPorCriterio();
                     } catch (RuntimeException e) {
-                        ui().errorExibir(e.getMessage());
+                        ui.errorExibir(e.getMessage());
                     }
                     break;
                 case 3:
                     try {
-                        service().alterar();
+                        facade.alterarPet();
                     } catch (RuntimeException e) {
-                        ui().errorExibir(e.getMessage());
+                        ui.errorExibir(e.getMessage());
                     }
                     break;
                 case 4:
                     try {
-                        service().remover();
+                        facade.removerPet();
                     } catch (RuntimeException e) {
-                        ui().errorExibir(e.getMessage());
+                        ui.errorExibir(e.getMessage());
                     }
                     break;
                 case 5:
-                    service().listarPetsCompleta();
+                    facade.listarPetsCompleta();
                     break;
                 case 6:
                     sairTrue = false;
                     break;
             }
         }
-    }
-
-    private InterfaceDeUsario ui() {
-        return ui;
-    }
-
-    private PetService service() {
-        return service;
     }
 }

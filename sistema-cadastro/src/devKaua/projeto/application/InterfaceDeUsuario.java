@@ -1,14 +1,9 @@
 package devKaua.projeto.application;
 
-import devKaua.projeto.domain.CriterioFiltro;
-import devKaua.projeto.domain.Pet;
-import devKaua.projeto.domain.Sexo;
-import devKaua.projeto.domain.TipoAnimal;
-
 import java.util.List;
 import java.util.Map;
 
-public interface InterfaceDeUsario {
+public interface InterfaceDeUsuario {
     int selecionarOpcao();
     void printMenuPrincipal();
 
@@ -21,38 +16,26 @@ public interface InterfaceDeUsario {
     String[] solicitarEndereco();
 
     int numeroPetListFiltrada();
-    String confirmacaoDeletarPet(Pet pet);
+    String confirmacaoDeletarPet(String nomePet);
     void mensagemDeletarPet();
 
     int solicitarOpcaoAlterar();
-
     void exibirMensagemAlteracaoConcluida();
-
     void exibirMensagemErrorConsulta();
-
-    void exibirPet(Pet pet);
-
+    void exibirPet(String petTexto);
     void errorExibir(String mensagem);
 
-    CriterioFiltro solicitarCriterioFiltro();
-
+    int solicitarCriterioFiltro();
     String solicitarTextoBusca();
-
-    Sexo solicitarSexoParaFiltro();
-
-    void exibirListaPets(List<Pet> listaAtual);
-
+    int solicitarSexoParaFiltro();
+    void exibirListaPets(String listaFormatada);
     void erroSalvarArquivoPet();
-
     void erroSalvarObjPet();
 
-    TipoAnimal solicitarTipoAnimalParaConsulta();
-
+    int solicitarTipoAnimalParaConsulta();
     void leituraFormulario();
 
-    int solicitarAcaoGerenciamentoCriterios(Map<CriterioFiltro, String> criterios);
-
-    CriterioFiltro solicitarCriterioParaRemover(Map<CriterioFiltro, String> criterios);
-
-    TipoAnimal solicitarTipoAnimalParaFiltro();
+    int solicitarAcaoGerenciamentoCriterios(Map<String, String> criteriosExibicao);
+    int solicitarCriterioParaRemover(List<String> descricoesCriterios);
+    int solicitarTipoAnimalParaFiltro();
 }
