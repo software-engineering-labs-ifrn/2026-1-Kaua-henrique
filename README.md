@@ -70,12 +70,36 @@ git clone https://github.com/Kaua-Henrique1/sistema-cadastro-java.git
 cd sistema-cadastro-java
 ```
 
-### 3. Executar o projeto
+# Como Compilar e Executar o Projeto
+
+Certifique-se de estar na raiz do repositório (`2026-1-Kaua-henrique`) antes de executar os comandos no terminal.
+
+### No Windows (PowerShell)
+
+Como o PowerShell possui regras restritas para caracteres como `@` e buscas recursivas, utilize os comandos nativos abaixo:
+
+```powershell
+# 1. Criar o diretório de saída para os binários
+New-Item -ItemType Directory -Path .\out -Force
+
+# 2. Compilar todos os arquivos .java recursivamente garantindo codificação UTF-8
+javac -encoding utf8 -d out $(Get-ChildItem -Path .\sistema-cadastro\src\ -Filter *.java -Recurse | Select-Object -ExpandProperty FullName)
+
+# 3. Executar o sistema
+java -cp out devKaua.projeto.presentation.GeradorDaONG
+```
+---
+
+### No Linux / macOS (Bash)
 
 ```bash
-# Compilar o código (Gera o arquivo .class)
-javac Main.java
+# 1. Criar o diretório de saída para os binários
+mkdir -p out
 
-# Executar o programa
-java Main
+# 2. Buscar todos os arquivos .java e compilá-los em lote em UTF-8
+find ./sistema-cadastro/src -name "*.java" | xargs javac -encoding utf8 -d out
+
+# 3. Executar o sistema
+java -cp out devKaua.projeto.presentation.GeradorDaONG
 ```
+
