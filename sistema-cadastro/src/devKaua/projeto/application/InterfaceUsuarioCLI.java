@@ -7,9 +7,25 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
     private final Scanner scanner = new Scanner(System.in);
+
+    @Override
+    public void iniciarFluxoPrincipal(PetFacade facade) {
+        int opcao = 0;
+        while (opcao != 6) {
+            printMenuPrincipal();
+            opcao = selecionarOpcao();
+
+            if (opcao != 6) {
+                // A interface passa a opção escolhida para a Facade executar
+                facade.executarAcao(opcao);
+            }
+        }
+        System.out.println("Sistema encerrado com sucesso. Até logo!");
+    }
 
     @Override
     public int selecionarOpcao() {

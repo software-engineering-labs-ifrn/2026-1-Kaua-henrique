@@ -9,12 +9,12 @@ public class GeradorDaONG {
     public static void main(String[] args) {
         InterfaceDeUsuario ui = new InterfaceUsuarioCLI();
         PetRepository repository = new PetRepositoryTXT("petsCadastrados");
+        repository.carregarDados();
+
         PetService service = new PetService(repository);
         PetFacade facade = new PetFacade(ui, service);
-        MenuPrincipal menu = new MenuPrincipal(ui, facade);
 
-        repository.carregarDados();
-        menu.run();
+        ui.iniciarFluxoPrincipal(facade);
     }
 
 }

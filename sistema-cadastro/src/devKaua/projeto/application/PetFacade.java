@@ -30,6 +30,17 @@ public class PetFacade {
         }
     }
 
+    public void executarAcao(int opcao) {
+        switch (opcao) {
+            case 1 -> cadastrarPet();
+            case 2 -> listarPetsPorCriterio();
+            case 3 -> alterarPet();
+            case 4 -> removerPet();
+            case 5 -> listarPetsCompleta();
+            default -> ui.errorExibir("Opção não reconhecida pelo sistema.");
+        }
+    }
+
     public void listarPetsCompleta() {
         String resultado = service.listarTodos();
         ui.exibirListaPets(resultado);

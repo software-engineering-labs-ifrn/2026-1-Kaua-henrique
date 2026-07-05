@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface InterfaceDeUsuario {
+    void iniciarFluxoPrincipal(PetFacade facade);
+
     int selecionarOpcao();
     void printMenuPrincipal();
 
