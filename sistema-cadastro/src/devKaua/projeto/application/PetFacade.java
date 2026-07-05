@@ -28,9 +28,9 @@ public class PetFacade {
         switch (opcao) {
             case 1 -> cadastrarAdotante();
             case 2 -> alterarAdotante();
+            case 3 -> removerAdotante();
         }
     }
-
     public void cadastrarAdotante() {
         String nome = ui.solicitarNomeAdotante();
         String cpf = ui.solicitarCpfAdotante();
@@ -76,6 +76,34 @@ public class PetFacade {
             ui.exibirMensagemAlteracaoConcluida(); // "Alteração concluída com sucesso!"
         } else if (resultado.startsWith("ERRO:")) {
             ui.errorExibir(resultado.substring(5)); // Exibe o erro de validação vindo do Domínio
+        }
+    }
+
+    public void removerAdotante() {
+        // Reutiliza o gerenciador de critérios que criamos na US07
+        if (!gerenciarCriteriosFluxoAdotantes()) return;
+
+        String listagem = adotanteService.executarBuscaComCriteriosAtuais();
+        if ("VAZIO".equals(listagem)) {
+            ui.exibirMensagemErrorConsulta();
+            return;
+        }
+        ui.exibirListaAdotantes(listagem);
+
+        int numeroAdotante = ui.numeroAdotanteListFiltrada();
+        String nomeAdotante = adotanteService.obterNomeAdotante(numeroAdotante);
+
+        if ("INVALIDO".equals(nomeAdotante)) {
+            ui.errorExibir("Número do adotante inválido.");
+            return;
+        }
+
+        // Pede a confirmação "SIM" ou "NÃO" (reutilizando a lógica visual do pet)
+        String confirmacao = ui.confirmacaoDeletarAdotante(nomeAdotante);
+
+        if (confirmacao.equalsIgnoreCase("SIM")) {
+            adotanteService.removerAdotante(numeroAdotante);
+            ui.mensagemDeletarAdotante();
         }
     }
 

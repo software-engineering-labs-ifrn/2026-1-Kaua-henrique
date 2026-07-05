@@ -148,4 +148,19 @@ public class AdotanteService {
         }
         return sb.toString();
     }
+
+    public String obterNomeAdotante(int numeroAdotante) {
+        Adotante adotante = obterAdotantePorIndiceFiltrado(numeroAdotante);
+        return (adotante != null) ? adotante.getNome() : "INVALIDO";
+    }
+
+    public void removerAdotante(int numeroAdotante) {
+        Adotante adotanteSelecionado = obterAdotantePorIndiceFiltrado(numeroAdotante);
+        if (adotanteSelecionado != null) {
+            // Remove do arquivo físico TXT através do repositório
+            adotanteRepository.deletar(adotanteSelecionado);
+            // Limpa da lista filtrada local da sessão
+            listaFiltrada.remove(adotanteSelecionado);
+        }
+    }
 }

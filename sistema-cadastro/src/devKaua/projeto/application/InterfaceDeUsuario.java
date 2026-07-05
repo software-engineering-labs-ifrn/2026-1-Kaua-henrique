@@ -57,4 +57,6 @@ public interface InterfaceDeUsuario {
     String solicitarTelefoneAdotante();
     String solicitarEmailAdotante();
     void exibirSucesso(String mensagem);
+    String confirmacaoDeletarAdotante(String nomeAdotante);
+    void mensagemDeletarAdotante();
 }

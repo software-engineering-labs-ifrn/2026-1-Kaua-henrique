@@ -70,7 +70,8 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         System.out.println("\n--- SUBMENU: GERENCIAR PESSOAS ---");
         System.out.println("1: Cadastrar um novo adotante");
         System.out.println("2: Alterar os dados do adotante cadastrado");
-        System.out.println("3: Voltar ao Menu Principal");
+        System.out.println("3: Deletar um adotante cadastrado"); // Nova Opção!
+        System.out.println("4: Voltar ao Menu Principal");
         System.out.println("----------------------------------");
     }
 
@@ -89,12 +90,12 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
 
     private void gerenciarMenuPessoas(PetFacade facade) {
         int opcaoSub = 0;
-        while (opcaoSub != 3) {
+        while (opcaoSub != 4) { // Sai com 4 agora
             printSubMenuPessoas();
             opcaoSub = selecionarOpcao();
-            if (opcaoSub == 1 || opcaoSub == 2) {
+            if (opcaoSub >= 1 && opcaoSub <= 3) { // Aceita 1, 2 e 3
                 facade.executarAcaoPessoa(opcaoSub);
-            } else if (opcaoSub != 3) {
+            } else if (opcaoSub != 4) {
                 System.out.println("Opção inválida para o menu de Pessoas.");
             }
         }
@@ -415,5 +416,15 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         int opcao = scanner.nextInt();
         scanner.nextLine(); // Limpar buffer
         return opcao;
+    }
+
+    public String confirmacaoDeletarAdotante(String nomeAdotante) {
+        System.out.println("Digite apenas 'SIM ou NÃO'");
+        System.out.println("Tem certeza que deseja deletar o adotante '" + nomeAdotante + "' do sistema (SIM ou NÃO)? ");
+        return this.scanner.nextLine();
+    }
+
+    public void mensagemDeletarAdotante() {
+        System.out.println("Adotante removido com sucesso!");
     }
 }
