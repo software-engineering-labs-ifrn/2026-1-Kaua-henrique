@@ -1,6 +1,8 @@
 package devKaua.projeto.application;
 
 import devKaua.projeto.domain.*;
+import devKaua.projeto.infrastructure.PetRepository;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,7 +30,7 @@ public class PetService {
             repository.salvar(novoPet);
             return "SUCESSO";
         } catch (IllegalArgumentException e) {
-            return "ERRO";
+            return e.getMessage();
         }
     }
 

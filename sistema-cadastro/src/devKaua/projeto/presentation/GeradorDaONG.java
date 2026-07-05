@@ -1,18 +1,25 @@
 package devKaua.projeto.presentation;
 
 import devKaua.projeto.application.*;
-import devKaua.projeto.domain.PetRepository;
+import devKaua.projeto.infrastructure.AdotanteRepository;
+import devKaua.projeto.infrastructure.AdotanteRepositoryTXT;
+import devKaua.projeto.infrastructure.PetRepository;
 import devKaua.projeto.infrastructure.PetRepositoryTXT;
 
 public class GeradorDaONG {
 
     public static void main(String[] args) {
-        InterfaceDeUsuario ui = new InterfaceUsuarioCLI();
-        PetRepository repository = new PetRepositoryTXT("petsCadastrados");
-        repository.carregarDados();
+        PetRepository petRepository = new PetRepositoryTXT("petsCadastrados");
+        petRepository.carregarDados();
 
-        PetService service = new PetService(repository);
-        PetFacade facade = new PetFacade(ui, service);
+        AdotanteRepository adotanteRepository = new AdotanteRepositoryTXT("adotantesCadastradosTXT");
+        adotanteRepository.carregarDados();
+
+        PetService petService = new PetService(petRepository);
+        AdotanteService adotanteService = new AdotanteService(adotanteRepository);
+        InterfaceDeUsuario ui = new InterfaceUsuarioCLI();
+
+        PetFacade facade = new PetFacade(ui, petService, adotanteService);
 
         ui.iniciarFluxoPrincipal(facade);
     }

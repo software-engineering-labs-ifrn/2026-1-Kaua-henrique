@@ -9,6 +9,9 @@ public interface InterfaceDeUsuario {
     int selecionarOpcao();
     void printMenuPrincipal();
 
+    void printSubMenuPets();
+    void printSubMenuPessoas();
+
     String solicitarNome();
     String solicitarRaca();
     int solicitarTipo();
@@ -40,4 +43,13 @@ public interface InterfaceDeUsuario {
     int solicitarAcaoGerenciamentoCriterios(Map<String, String> criteriosExibicao);
     int solicitarCriterioParaRemover(List<String> descricoesCriterios);
     int solicitarTipoAnimalParaFiltro();
+
+    String solicitarNomeAdotante();
+    String solicitarCpfAdotante();
+    String solicitarRuaAdotante();
+    String solicitarNumeroAdotante();
+    String solicitarCidadeAdotante();
+    String solicitarTelefoneAdotante();
+    String solicitarEmailAdotante();
+    void exibirSucesso(String mensagem);
 }

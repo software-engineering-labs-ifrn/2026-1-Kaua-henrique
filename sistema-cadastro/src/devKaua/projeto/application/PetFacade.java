@@ -5,11 +5,47 @@ import java.util.Map;
 
 public class PetFacade {
     private final InterfaceDeUsuario ui;
-    private final PetService service;
+    private final PetService petService;
+    private final AdotanteService adotanteService; // Novo Serviço injetado
 
-    public PetFacade(InterfaceDeUsuario ui, PetService service) {
+    public PetFacade(InterfaceDeUsuario ui, PetService petService, AdotanteService adotanteService) {
         this.ui = ui;
-        this.service = service;
+        this.petService = petService;
+        this.adotanteService = adotanteService;
+    }
+
+    public void executarAcaoPet(int opcao) {
+        switch (opcao) {
+            case 1 -> cadastrarPet();
+            case 2 -> listarPetsPorCriterio();
+            case 3 -> alterarPet();
+            case 4 -> removerPet();
+            case 5 -> listarPetsCompleta();
+        }
+    }
+
+    public void executarAcaoPessoa(int opcao) {
+        switch (opcao) {
+            case 1 -> cadastrarAdotante();
+        }
+    }
+
+    public void cadastrarAdotante() {
+        String nome = ui.solicitarNomeAdotante();
+        String cpf = ui.solicitarCpfAdotante();
+        String rua = ui.solicitarRuaAdotante();
+        String numero = ui.solicitarNumeroAdotante();
+        String cidade = ui.solicitarCidadeAdotante();
+        String telefone = ui.solicitarTelefoneAdotante();
+        String email = ui.solicitarEmailAdotante();
+
+        String resposta = adotanteService.registrarAdotante(nome, cpf, rua, numero, cidade, telefone, email);
+
+        if ("SUCESSO".equals(resposta)) {
+            ui.exibirSucesso("Adotante cadastrado com sucesso!");
+        } else {
+            ui.errorExibir(resposta);
+        }
     }
 
     public void cadastrarPet() {
@@ -21,7 +57,7 @@ public class PetFacade {
         String idade = ui.solicitarIdade();
         String peso = ui.solicitarPeso();
 
-        String resposta = service.cadastrar(tipo, sexo, endereco, nome, raca, idade, peso);
+        String resposta = petService.cadastrar(tipo, sexo, endereco, nome, raca, idade, peso);
 
         if ("SUCESSO".equals(resposta)) {
             // Sucesso opcionalmente tratado pelo fluxo principal
@@ -30,26 +66,15 @@ public class PetFacade {
         }
     }
 
-    public void executarAcao(int opcao) {
-        switch (opcao) {
-            case 1 -> cadastrarPet();
-            case 2 -> listarPetsPorCriterio();
-            case 3 -> alterarPet();
-            case 4 -> removerPet();
-            case 5 -> listarPetsCompleta();
-            default -> ui.errorExibir("Opção não reconhecida pelo sistema.");
-        }
-    }
-
     public void listarPetsCompleta() {
-        String resultado = service.listarTodos();
+        String resultado = petService.listarTodos();
         ui.exibirListaPets(resultado);
     }
 
     public void alterarPet() {
-        if (!gerenciarCriteriosFluxo()) return;
+        if (!gerenciarCriteriosFluxoPets()) return;
 
-        String listagem = service.executarBuscaComCriteriosAtuais();
+        String listagem = petService.executarBuscaComCriteriosAtuais();
         if ("VAZIO".equals(listagem)) {
             ui.exibirMensagemErrorConsulta();
             return;
@@ -67,7 +92,7 @@ public class PetFacade {
             default -> "";
         };
 
-        String resultado = service.alterarCampoPet(numeroPet, opcaoCampo, novoValor);
+        String resultado = petService.alterarCampoPet(numeroPet, opcaoCampo, novoValor);
 
         if ("SUCESSO".equals(resultado)) {
             ui.exibirMensagemAlteracaoConcluida();
@@ -77,9 +102,9 @@ public class PetFacade {
     }
 
     public void removerPet() {
-        if (!gerenciarCriteriosFluxo()) return;
+        if (!gerenciarCriteriosFluxoPets()) return;
 
-        String listagem = service.executarBuscaComCriteriosAtuais();
+        String listagem = petService.executarBuscaComCriteriosAtuais();
         if ("VAZIO".equals(listagem)) {
             ui.exibirMensagemErrorConsulta();
             return;
@@ -87,7 +112,7 @@ public class PetFacade {
         ui.exibirListaPets(listagem);
 
         int numeroPet = ui.numeroPetListFiltrada();
-        String nomePet = service.obterNomePet(numeroPet);
+        String nomePet = petService.obterNomePet(numeroPet);
 
         if ("INVALIDO".equals(nomePet)) {
             ui.errorExibir("Número do pet inválido.");
@@ -97,15 +122,15 @@ public class PetFacade {
         String confirmacao = ui.confirmacaoDeletarPet(nomePet);
 
         if (confirmacao.equalsIgnoreCase("SIM")) {
-            service.removerPet(numeroPet);
+            petService.removerPet(numeroPet);
             ui.mensagemDeletarPet();
         }
     }
 
     public void listarPetsPorCriterio() {
-        if (!gerenciarCriteriosFluxo()) return;
+        if (!gerenciarCriteriosFluxoPets()) return;
 
-        String listagem = service.executarBuscaComCriteriosAtuais();
+        String listagem = petService.executarBuscaComCriteriosAtuais();
         if ("VAZIO".equals(listagem)) {
             ui.exibirMensagemErrorConsulta();
             return;
@@ -113,10 +138,10 @@ public class PetFacade {
         ui.exibirListaPets(listagem);
     }
 
-    private boolean gerenciarCriteriosFluxo() {
-        service.limparCriterios();
+    private boolean gerenciarCriteriosFluxoPets() {
+        petService.limparCriterios();
         while (true) {
-            Map<String, String> dadosExibicao = service.obterCriteriosParaExibicao();
+            Map<String, String> dadosExibicao = petService.obterCriteriosParaExibicao();
             int acao = ui.solicitarAcaoGerenciamentoCriterios(dadosExibicao);
 
             switch (acao) {
@@ -127,12 +152,12 @@ public class PetFacade {
                         case 7 -> String.valueOf(ui.solicitarTipoAnimalParaFiltro());
                         default -> ui.solicitarTextoBusca();
                     };
-                    service.adicionarCriterio(opcaoCrit, valor);
+                    petService.adicionarCriterio(opcaoCrit, valor);
                 }
                 case 2 -> {
-                    List<String> descricoes = service.obterDescricoesCriteriosAtivos();
+                    List<String> descricoes = petService.obterDescricoesCriteriosAtivos();
                     int indice = ui.solicitarCriterioParaRemover(descricoes);
-                    service.removerCriterioPorIndice(indice);
+                    petService.removerCriterioPorIndice(indice);
                 }
                 case 3 -> { return true; }
                 case 4 -> { return false; }

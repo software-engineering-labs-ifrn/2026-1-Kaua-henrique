@@ -15,39 +15,90 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
     @Override
     public void iniciarFluxoPrincipal(PetFacade facade) {
         int opcao = 0;
-        while (opcao != 6) {
+        while (opcao != 3) {
             printMenuPrincipal();
             opcao = selecionarOpcao();
 
-            if (opcao != 6) {
-                // A interface passa a opção escolhida para a Facade executar
-                facade.executarAcao(opcao);
+            switch (opcao) {
+                case 1 -> gerenciarMenuPets(facade);
+                case 2 -> gerenciarMenuPessoas(facade);
+                case 3 -> System.out.println("Sistema encerrado com sucesso. Até logo!");
             }
         }
-        System.out.println("Sistema encerrado com sucesso. Até logo!");
     }
 
     @Override
     public int selecionarOpcao() {
         int opcao;
-        do {
-            System.out.println("Escolha sua opção: (Digite apenas de 1 a 6)");
-            opcao = scanner.nextInt();
-            scanner.nextLine();
-        } while (opcao < 1 || opcao > 6);
+        while (true) {
+            try {
+                System.out.print("Escolha sua opção: ");
+                opcao = scanner.nextInt();
+                scanner.nextLine(); // Limpa o buffer
+                break;
+            } catch (Exception e) {
+                System.out.println("Entrada inválida. Por favor, digite um número.");
+                scanner.nextLine();
+            }
+        }
         return opcao;
     }
 
     @Override
     public void printMenuPrincipal() {
+        System.out.println("\n=== MENU PRINCIPAL ===");
+        System.out.println("1: Gerenciar Pets");
+        System.out.println("2: Gerenciar Pessoas (Adotantes/Tutores)");
+        System.out.println("3: Sair");
+        System.out.println("======================");
+    }
+
+    @Override
+    public void printSubMenuPets() {
+        System.out.println("\n--- SUBMENU: GERENCIAR PETS ---");
         System.out.println("1: Cadastrar um novo pet");
         System.out.println("2: Listar pets por algum critério");
         System.out.println("3: Alterar os dados do pet cadastrado");
         System.out.println("4: Deletar um pet cadastrado");
-        System.out.println("5: Lista todos os pets cadastrados");
-        System.out.println("6: Sair");
-        System.out.println();
+        System.out.println("5: Listar todos os pets cadastrados");
+        System.out.println("6: Voltar ao Menu Principal");
+        System.out.println("--------------------------------");
     }
+
+    @Override
+    public void printSubMenuPessoas() {
+        System.out.println("\n--- SUBMENU: GERENCIAR PESSOAS ---");
+        System.out.println("1: Cadastrar um novo adotante");
+        System.out.println("2: Voltar ao Menu Principal");
+        System.out.println("----------------------------------");
+    }
+
+    private void gerenciarMenuPets(PetFacade facade) {
+        int opcaoSub = 0;
+        while (opcaoSub != 6) {
+            printSubMenuPets();
+            opcaoSub = selecionarOpcao();
+            if (opcaoSub >= 1 && opcaoSub <= 5) {
+                facade.executarAcaoPet(opcaoSub);
+            } else if (opcaoSub != 6) {
+                System.out.println("Opção inválida para o menu de Pets.");
+            }
+        }
+    }
+
+    private void gerenciarMenuPessoas(PetFacade facade) {
+        int opcaoSub = 0;
+        while (opcaoSub != 2) {
+            printSubMenuPessoas();
+            opcaoSub = selecionarOpcao();
+            if (opcaoSub == 1) {
+                facade.executarAcaoPessoa(opcaoSub);
+            } else if (opcaoSub != 2) {
+                System.out.println("Opção inválida para o menu de Pessoas.");
+            }
+        }
+    }
+
 
     @Override
     public String solicitarNome() {
@@ -268,5 +319,52 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         } catch (IOException e) {
             errorExibir(e.getMessage());
         }
+    }
+
+    @Override
+    public String solicitarNomeAdotante() {
+        System.out.print("Nome Completo do Adotante: ");
+        return this.scanner.nextLine();
+    }
+
+    @Override
+    public String solicitarCpfAdotante() {
+        System.out.print("CPF (apenas números): ");
+        return this.scanner.nextLine();
+    }
+
+    @Override
+    public String solicitarRuaAdotante() {
+        System.out.print("Endereço - Rua/Logradouro: ");
+        return this.scanner.nextLine();
+    }
+
+    @Override
+    public String solicitarNumeroAdotante() {
+        System.out.print("Endereço - Número: ");
+        return this.scanner.nextLine();
+    }
+
+    @Override
+    public String solicitarCidadeAdotante() {
+        System.out.print("Endereço - Cidade: ");
+        return this.scanner.nextLine();
+    }
+
+    @Override
+    public String solicitarTelefoneAdotante() {
+        System.out.print("Telefone (com DDD, apenas números): ");
+        return this.scanner.nextLine();
+    }
+
+    @Override
+    public String solicitarEmailAdotante() {
+        System.out.print("E-mail: ");
+        return this.scanner.nextLine();
+    }
+
+    @Override
+    public void exibirSucesso(String mensagem) {
+        System.out.println("\n✅ SUCESSO: " + mensagem + "\n");
     }
 }
