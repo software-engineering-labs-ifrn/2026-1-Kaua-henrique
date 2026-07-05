@@ -40,6 +40,11 @@ public interface InterfaceDeUsuario {
     int solicitarTipoAnimalParaConsulta();
     void leituraFormulario();
 
+    void exibirListaAdotantes(String listagem);
+    int numeroAdotanteListFiltrada();
+    int solicitarOpcaoAlterarAdotante();
+    int solicitarCriterioFiltroAdotante();
+
     int solicitarAcaoGerenciamentoCriterios(Map<String, String> criteriosExibicao);
     int solicitarCriterioParaRemover(List<String> descricoesCriterios);
     int solicitarTipoAnimalParaFiltro();

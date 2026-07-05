@@ -69,7 +69,8 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
     public void printSubMenuPessoas() {
         System.out.println("\n--- SUBMENU: GERENCIAR PESSOAS ---");
         System.out.println("1: Cadastrar um novo adotante");
-        System.out.println("2: Voltar ao Menu Principal");
+        System.out.println("2: Alterar os dados do adotante cadastrado");
+        System.out.println("3: Voltar ao Menu Principal");
         System.out.println("----------------------------------");
     }
 
@@ -88,12 +89,12 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
 
     private void gerenciarMenuPessoas(PetFacade facade) {
         int opcaoSub = 0;
-        while (opcaoSub != 2) {
+        while (opcaoSub != 3) {
             printSubMenuPessoas();
             opcaoSub = selecionarOpcao();
-            if (opcaoSub == 1) {
+            if (opcaoSub == 1 || opcaoSub == 2) {
                 facade.executarAcaoPessoa(opcaoSub);
-            } else if (opcaoSub != 2) {
+            } else if (opcaoSub != 3) {
                 System.out.println("Opção inválida para o menu de Pessoas.");
             }
         }
@@ -366,5 +367,53 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
     @Override
     public void exibirSucesso(String mensagem) {
         System.out.println("\n✅ SUCESSO: " + mensagem + "\n");
+    }
+
+    public void exibirListaAdotantes(String listagem) {
+        System.out.println("\n=== ADOTANTES ENCONTRADOS ===");
+        System.out.println(listagem);
+        System.out.println("=============================");
+    }
+
+    public int numeroAdotanteListFiltrada() {
+        System.out.print("\nDigite o número sequencial do adotante que deseja selecionar: ");
+        while (!scanner.hasNextInt()) {
+            System.out.print("Por favor, digite um número válido: ");
+            scanner.next();
+        }
+        int numero = scanner.nextInt();
+        scanner.nextLine(); // Limpar buffer
+        return numero;
+    }
+
+    public int solicitarOpcaoAlterarAdotante() {
+        System.out.println("\n--- O QUE DESEJA ALTERAR? ---");
+        System.out.println("1: Nome");
+        System.out.println("2: Telefone");
+        System.out.println("3: E-mail");
+        System.out.println("-----------------------------");
+        System.out.print("Escolha uma opção: ");
+        while (!scanner.hasNextInt()) {
+            System.out.print("Opção inválida. Escolha entre 1 e 3: ");
+            scanner.next();
+        }
+        int opcao = scanner.nextInt();
+        scanner.nextLine(); // Limpar buffer
+        return opcao;
+    }
+
+    public int solicitarCriterioFiltroAdotante() {
+        System.out.println("\n--- FILTRAR ADOTANTE POR: ---");
+        System.out.println("1: Nome");
+        System.out.println("2: CPF");
+        System.out.println("-----------------------------");
+        System.out.print("Escolha uma opção: ");
+        while (!scanner.hasNextInt()) {
+            System.out.print("Opção inválida. Escolha 1 ou 2: ");
+            scanner.next();
+        }
+        int opcao = scanner.nextInt();
+        scanner.nextLine(); // Limpar buffer
+        return opcao;
     }
 }
