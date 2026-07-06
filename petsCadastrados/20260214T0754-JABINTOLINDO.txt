@@ -6,4 +6,4 @@ ID - 8
 5 - 9 anos
 6 - 30kg
 7 - Viralata
-8 - 2
+8 - 

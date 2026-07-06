@@ -33,24 +33,13 @@ public class PetFacade {
             case 5 -> listarTodosTutores();
             case 6 -> buscarTutoresPorCriterio();
             case 7 -> removerTutor();
+            case 8 -> desvincularTutorPet();
         }
     }
 
     public void removerTutor() {
-        System.out.println("\n=============================================");
-        System.out.println("       PASSO 1: LOCALIZAR O TUTOR            ");
-        System.out.println("=============================================");
-
-        if (!gerenciarCriteriosFluxoAdotantes()) return;
-
-        String listagem = adotanteService.executarBuscaTutoresComCriterios(petService);
-        if ("VAZIO".equals(listagem)) {
-            ui.exibirMensagemErrorConsulta();
-            return;
-        }
-        ui.exibirListaTutores(listagem);
-
-        int numeroTutor = ui.numeroAdotanteListFiltrada();
+        int numeroTutor = localizarTutorEObterIndice("PASSO 1: LOCALIZAR O TUTOR");
+        if (numeroTutor == -1) return;
 
         String nomeTutor = adotanteService.obterNomeAdotantePorIndiceFiltrado(numeroTutor);
         if ("INVALIDO".equals(nomeTutor)) {
@@ -59,7 +48,6 @@ public class PetFacade {
         }
 
         String confirmacao = ui.confirmacaoDeletarTutor(nomeTutor);
-
         if (confirmacao.equalsIgnoreCase("SIM")) {
             Long idTutorDeletado = adotanteService.removerTutorEObterId(numeroTutor);
 
@@ -72,6 +60,60 @@ public class PetFacade {
         } else {
             System.out.println("Operação cancelada.");
         }
+    }
+
+    public void desvincularTutorPet() {
+        int numeroTutor = localizarTutorEObterIndice("PASSO 1: SELECIONAR O TUTOR");
+        if (numeroTutor == -1) return;
+
+        Long idTutor = adotanteService.obterIdAdotantePorIndiceFiltrado(numeroTutor);
+        if (idTutor == null) {
+            ui.errorExibir("Número do tutor inválido.");
+            return;
+        }
+
+        int numeroPetDaLista = selecionarPetDoTutorEObterIndice(idTutor, "PASSO 2: SELECIONAR O PET PARA REMOVER");
+        if (numeroPetDaLista == -1) return;
+
+        String resultado = petService.executarDesvinculoUnico(idTutor, numeroPetDaLista);
+
+        if ("SUCESSO".equals(resultado)) {
+            ui.exibirSucesso("Desvinculação realizada com sucesso!");
+        } else {
+            ui.errorExibir(resultado);
+        }
+    }
+
+    private int localizarTutorEObterIndice(String tituloPasso) {
+        System.out.println("\n=============================================");
+        System.out.println("       " + tituloPasso + "            ");
+        System.out.println("=============================================");
+
+        if (!gerenciarCriteriosFluxoAdotantes()) return -1; // -1 significa operação abortada
+
+        String listagem = adotanteService.executarBuscaTutoresComCriterios(petService);
+        if ("VAZIO".equals(listagem)) {
+            ui.exibirMensagemErrorConsulta();
+            return -1;
+        }
+        ui.exibirListaTutores(listagem);
+
+        return ui.numeroAdotanteListFiltrada();
+    }
+
+    private int selecionarPetDoTutorEObterIndice(Long idTutor, String tituloPasso) {
+        System.out.println("\n=============================================");
+        System.out.println("   " + tituloPasso + "    ");
+        System.out.println("=============================================");
+
+        String listagemPetsDoTutor = petService.listarPetsDoTutor(idTutor);
+        if ("VAZIO".equals(listagemPetsDoTutor)) {
+            ui.errorExibir("Este tutor não possui pets vinculados na memória.");
+            return -1;
+        }
+        ui.exibirListaPets(listagemPetsDoTutor);
+
+        return ui.numeroPetListFiltrada();
     }
 
     private void listarTodosAdotantesPuros() {

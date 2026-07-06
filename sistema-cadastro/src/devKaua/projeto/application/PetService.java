@@ -9,6 +9,7 @@ public class PetService {
     private final PetFiltro petFiltro;
     private final PetRepository repository;
 
+    private final List<Pet> subListaPetsDoTutor = new ArrayList<>();
     private final Map<CriterioFiltro, String> criteriosAtivos = new LinkedHashMap<>();
 
     public PetService(PetRepository repository) {
@@ -28,6 +29,46 @@ public class PetService {
             return "SUCESSO";
         } catch (IllegalArgumentException e) {
             return e.getMessage();
+        }
+    }
+
+    public String listarPetsDoTutor(Long idTutor) {
+        subListaPetsDoTutor.clear();
+        List<Pet> todosOsPets = repository.listarTodos();
+        StringBuilder sb = new StringBuilder();
+        int contador = 1;
+
+        for (Pet pet : todosOsPets) {
+            if (pet.getTutorId() != null && pet.getTutorId().equals(idTutor)) {
+                subListaPetsDoTutor.add(pet);
+                sb.append("\n").append(contador++).append(pet.toString());
+            }
+        }
+        return sb.isEmpty() ? "VAZIO" : sb.toString();
+    }
+
+    public String executarDesvinculoUnico(Long idTutor, int numeroPetDaLista) {
+        int index = numeroPetDaLista - 1;
+        if (index < 0 || index >= subListaPetsDoTutor.size()) {
+            return "Operação Abortada: Número sequencial do pet inválido.";
+        }
+
+        Pet petAlvo = subListaPetsDoTutor.get(index);
+
+        if (petAlvo.getTutorId() == null || !petAlvo.getTutorId().equals(idTutor)) {
+            return "Operação Abortada: O pet selecionado não pertence a este tutor.";
+        }
+
+        try {
+            boolean atualizou = repository.atualizar(petAlvo, "8 - ");
+
+            if (atualizou) {
+                petAlvo.desvincularTutor();
+            }
+
+            return "SUCESSO";
+        } catch (Exception e) {
+            return "Erro técnico ao tentar desvincular o arquivo: " + e.getMessage();
         }
     }
 

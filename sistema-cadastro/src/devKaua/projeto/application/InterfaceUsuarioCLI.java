@@ -100,7 +100,8 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         System.out.println("5: Listar todos os Tutores (Com pets)");
         System.out.println("6: Filtrar/Buscar Tutores por critério");
         System.out.println("7: Deletar um Tutor (Desvincular responsabilidade)"); // 🔄 US12
-        System.out.println("8: Voltar ao Menu Principal");
+        System.out.println("8: Desvincular Tutor de um Pet");
+        System.out.println("9: Voltar ao Menu Principal");
         System.out.println("----------------------------------");
     }
 
@@ -119,12 +120,12 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
 
     private void gerenciarMenuPessoas(PetFacade facade) {
         int opcaoSub = 0;
-        while (opcaoSub != 8) {
+        while (opcaoSub != 9) {
             printSubMenuPessoas();
             opcaoSub = selecionarOpcao();
-            if (opcaoSub >= 1 && opcaoSub <= 7) {
+            if (opcaoSub >= 1 && opcaoSub <= 8) {
                 facade.executarAcaoPessoa(opcaoSub);
-            } else if (opcaoSub != 8) {
+            } else if (opcaoSub != 9) {
                 System.out.println("Opção inválida para o menu de Pessoas.");
             }
         }

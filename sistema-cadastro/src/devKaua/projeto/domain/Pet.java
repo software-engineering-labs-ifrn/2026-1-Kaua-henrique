@@ -178,6 +178,10 @@ public class Pet {
         return tutorId;
     }
 
+    public void desvincularTutor() {
+        this.tutorId = null;
+    }
+
     public static void atualizarGerador(Long maiorIdEncontrado) {
         if (maiorIdEncontrado >= idGenerator.get()) {
             idGenerator.set(maiorIdEncontrado + 1);

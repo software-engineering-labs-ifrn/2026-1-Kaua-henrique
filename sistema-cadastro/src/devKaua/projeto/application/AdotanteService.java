@@ -285,4 +285,12 @@ public class AdotanteService {
         }
         return sb.toString();
     }
+
+    public Long obterIdAdotantePorIndiceFiltrado(int numeroTutor) {
+        int index = numeroTutor - 1;
+        if (index >= 0 && index < listaFiltrada.size()) {
+            return listaFiltrada.get(index).getID();
+        }
+        return null;
+    }
 }
