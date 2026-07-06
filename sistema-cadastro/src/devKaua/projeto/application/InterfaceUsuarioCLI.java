@@ -1,5 +1,6 @@
 package devKaua.projeto.application;
 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -101,7 +102,8 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         System.out.println("6: Filtrar/Buscar Tutores por critério");
         System.out.println("7: Deletar um Tutor (Desvincular responsabilidade)"); // 🔄 US12
         System.out.println("8: Desvincular Tutor de um Pet");
-        System.out.println("9: Voltar ao Menu Principal");
+        System.out.println("9: Alterar informações de um Tutor");
+        System.out.println("10: Voltar ao Menu Principal");
         System.out.println("----------------------------------");
     }
 
@@ -120,12 +122,12 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
 
     private void gerenciarMenuPessoas(PetFacade facade) {
         int opcaoSub = 0;
-        while (opcaoSub != 9) {
+        while (opcaoSub != 10) {
             printSubMenuPessoas();
             opcaoSub = selecionarOpcao();
-            if (opcaoSub >= 1 && opcaoSub <= 8) {
+            if (opcaoSub >= 1 && opcaoSub <= 9) {
                 facade.executarAcaoPessoa(opcaoSub);
-            } else if (opcaoSub != 9) {
+            } else if (opcaoSub != 10) {
                 System.out.println("Opção inválida para o menu de Pessoas.");
             }
         }

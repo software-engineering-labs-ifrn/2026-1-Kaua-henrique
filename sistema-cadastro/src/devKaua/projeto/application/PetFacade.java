@@ -34,6 +34,7 @@ public class PetFacade {
             case 6 -> buscarTutoresPorCriterio();
             case 7 -> removerTutor();
             case 8 -> desvincularTutorPet();
+            case 9 -> alterarTutor();
         }
     }
 
@@ -59,6 +60,36 @@ public class PetFacade {
             }
         } else {
             System.out.println("Operação cancelada.");
+        }
+    }
+
+    public void alterarTutor() {
+        int numeroTutor = localizarTutorEObterIndice("PASSO 1: LOCALIZAR O TUTOR PARA ALTERAÇÃO");
+        if (numeroTutor == -1) return;
+
+        int opcaoCampo = ui.solicitarOpcaoAlterarAdotante();
+        String novoValor = "";
+
+        System.out.println("\n--- DIGITE O NOVO VALOR ---");
+        switch (opcaoCampo) {
+            case 1 -> novoValor = ui.solicitarNomeAdotante();
+            case 2 -> novoValor = ui.solicitarTelefoneAdotante();
+            case 3 -> novoValor = ui.solicitarEmailAdotante();
+            default -> {
+                ui.errorExibir("Opção de campo inválida.");
+                return;
+            }
+        }
+
+        String resultadoAlteracao = adotanteService.executarAlteracaoTutor(numeroTutor, opcaoCampo, novoValor, petService);
+
+        if (resultadoAlteracao.startsWith("ERRO:")) {
+            ui.errorExibir(resultadoAlteracao.substring(5));
+        } else {
+            ui.exibirSucesso("Dados do tutor atualizados com sucesso!");
+            System.out.println("=== DADOS ATUALIZADOS ===");
+            System.out.println(resultadoAlteracao);
+            System.out.println("=========================\n");
         }
     }
 

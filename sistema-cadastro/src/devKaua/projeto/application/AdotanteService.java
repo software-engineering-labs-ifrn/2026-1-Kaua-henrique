@@ -202,6 +202,51 @@ public class AdotanteService {
         return null;
     }
 
+    public String executarAlteracaoTutor(int numeroTutor, int opcaoCampo, String novoValor, PetService petService) {
+        if (numeroTutor < 1 || numeroTutor > listaFiltrada.size()) {
+            return "ERRO:Número do tutor inválido.";
+        }
+
+        Adotante alvo = listaFiltrada.get(numeroTutor - 1);
+
+        try {
+            String linhaNova = "";
+
+            switch (opcaoCampo) {
+                case 1 -> {
+                    alvo.alterarNome(novoValor);
+                    linhaNova = "1 - " + alvo.getNome();
+                }
+                case 2 -> {
+                    alvo.alterarTelefone(novoValor);
+                    linhaNova = "3 - " + alvo.getTelefone();
+                }
+                case 3 -> {
+                    alvo.alterarEmail(novoValor);
+                    linhaNova = "4 - " + alvo.getEmail();
+                }
+                default -> {
+                    return "ERRO:Opção inválida.";
+                }
+            }
+            adotanteRepository.atualizar(alvo, linhaNova);
+            Tutor tutorAtualizado = Tutor.promoverAdotante(alvo);
+
+            for (Pet p : petService.obterListaDeObjetosPets()) {
+                if (p.getTutorId() != null && p.getTutorId().equals(tutorAtualizado.getID())) {
+                    tutorAtualizado.adicionarPet(p);
+                }
+            }
+
+            return tutorAtualizado.toString();
+
+        } catch (IllegalArgumentException e) {
+            return "ERRO:" + e.getMessage();
+        } catch (Exception e) {
+            return "ERRO:Erro técnico ao atualizar arquivo: " + e.getMessage();
+        }
+    }
+
     // LISTAR TODOS OS ADOTANTES (Sem Pet)
     public String listarTodosAdotantesPuros(PetService petService) {
         List<Adotante> todos = adotanteRepository.listarTodos();
