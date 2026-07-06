@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.function.Consumer;
 
 public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
     private final Scanner scanner = new Scanner(System.in);
@@ -15,7 +14,7 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
     @Override
     public void iniciarFluxoPrincipal(PetFacade facade) {
         int opcao = 0;
-        while (opcao != 4) { // Agora sai com 4
+        while (opcao != 4) {
             printMenuPrincipal();
             opcao = selecionarOpcao();
 
@@ -35,7 +34,7 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
             try {
                 System.out.print("Escolha sua opção: ");
                 opcao = scanner.nextInt();
-                scanner.nextLine(); // Limpa o buffer
+                scanner.nextLine();
                 break;
             } catch (Exception e) {
                 System.out.println("Entrada inválida. Por favor, digite um número.");
@@ -66,6 +65,7 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         scanner.nextLine();
         return id;
     }
+
     @Override
     public Long solicitarIdPet() {
         System.out.print("Digite o ID do Pet a ser vinculado: ");
@@ -99,7 +99,8 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         System.out.println("4: Listar todos os Adotantes (Sem pets)");
         System.out.println("5: Listar todos os Tutores (Com pets)");
         System.out.println("6: Filtrar/Buscar Tutores por critério");
-        System.out.println("7: Voltar ao Menu Principal");
+        System.out.println("7: Deletar um Tutor (Desvincular responsabilidade)"); // 🔄 US12
+        System.out.println("8: Voltar ao Menu Principal");
         System.out.println("----------------------------------");
     }
 
@@ -118,23 +119,36 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
 
     private void gerenciarMenuPessoas(PetFacade facade) {
         int opcaoSub = 0;
-        while (opcaoSub != 7) { // Sai com 7 agora
+        while (opcaoSub != 8) {
             printSubMenuPessoas();
             opcaoSub = selecionarOpcao();
-            if (opcaoSub >= 1 && opcaoSub <= 6) {
+            if (opcaoSub >= 1 && opcaoSub <= 7) {
                 facade.executarAcaoPessoa(opcaoSub);
-            } else if (opcaoSub != 7) {
+            } else if (opcaoSub != 8) {
                 System.out.println("Opção inválida para o menu de Pessoas.");
             }
         }
     }
 
+    @Override
     public void exibirListaTutores(String listagem) {
         System.out.println("\n=== TUTORES ENCONTRADOS ===");
         System.out.println(listagem);
         System.out.println("===========================");
     }
 
+    @Override
+    public String confirmacaoDeletarTutor(String nomeTutor) {
+        System.out.println("\n⚠️ ATENÇÃO: Ao deletar o tutor, todos os seus pets voltarão a ficar disponíveis para adoção!");
+        System.out.println("Digite apenas 'SIM ou NÃO'");
+        System.out.print("Tem certeza que deseja deletar o tutor '" + nomeTutor + "' (SIM ou NÃO)? ");
+        return this.scanner.nextLine();
+    }
+
+    @Override
+    public void mensagemDeletarTutorSucesso() {
+        System.out.println("\n✅ SUCESSO: Tutor removido com sucesso e pets desvinculados!\n");
+    }
 
     @Override
     public String solicitarNome() {
@@ -404,12 +418,14 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         System.out.println("\n✅ SUCESSO: " + mensagem + "\n");
     }
 
+    @Override
     public void exibirListaAdotantes(String listagem) {
         System.out.println("\n=== ADOTANTES ENCONTRADOS ===");
         System.out.println(listagem);
         System.out.println("=============================");
     }
 
+    @Override
     public int numeroAdotanteListFiltrada() {
         System.out.print("\nDigite o número sequencial do adotante que deseja selecionar: ");
         while (!scanner.hasNextInt()) {
@@ -417,10 +433,11 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
             scanner.next();
         }
         int numero = scanner.nextInt();
-        scanner.nextLine(); // Limpar buffer
+        scanner.nextLine();
         return numero;
     }
 
+    @Override
     public int solicitarOpcaoAlterarAdotante() {
         System.out.println("\n--- O QUE DESEJA ALTERAR? ---");
         System.out.println("1: Nome");
@@ -433,10 +450,11 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
             scanner.next();
         }
         int opcao = scanner.nextInt();
-        scanner.nextLine(); // Limpar buffer
+        scanner.nextLine();
         return opcao;
     }
 
+    @Override
     public int solicitarCriterioFiltroAdotante() {
         System.out.println("\n--- FILTRAR ADOTANTE POR: ---");
         System.out.println("1: Nome");
@@ -448,16 +466,18 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
             scanner.next();
         }
         int opcao = scanner.nextInt();
-        scanner.nextLine(); // Limpar buffer
+        scanner.nextLine();
         return opcao;
     }
 
+    @Override
     public String confirmacaoDeletarAdotante(String nomeAdotante) {
         System.out.println("Digite apenas 'SIM ou NÃO'");
         System.out.println("Tem certeza que deseja deletar o adotante '" + nomeAdotante + "' do sistema (SIM ou NÃO)? ");
         return this.scanner.nextLine();
     }
 
+    @Override
     public void mensagemDeletarAdotante() {
         System.out.println("Adotante removido com sucesso!");
     }

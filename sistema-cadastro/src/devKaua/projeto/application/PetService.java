@@ -166,4 +166,16 @@ public class PetService {
     public List<Pet> obterListaDeObjetosPets() {
         return repository.listarTodos(); // Retorna a lista de objetos, não a String!
     }
+
+    public void desvincularPetsDoTutor(Long idTutor) {
+        List<Pet> todosOsPets = repository.listarTodos();
+
+        for (Pet pet : todosOsPets) {
+            if (pet.getTutorId() != null && pet.getTutorId().equals(idTutor)) {
+                repository.atualizar(pet, "8 - ");
+
+                pet.alterarNome(pet.getNome());
+            }
+        }
+    }
 }

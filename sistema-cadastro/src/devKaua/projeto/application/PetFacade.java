@@ -32,6 +32,45 @@ public class PetFacade {
             case 4 -> listarTodosAdotantesPuros();
             case 5 -> listarTodosTutores();
             case 6 -> buscarTutoresPorCriterio();
+            case 7 -> removerTutor();
+        }
+    }
+
+    public void removerTutor() {
+        System.out.println("\n=============================================");
+        System.out.println("       PASSO 1: LOCALIZAR O TUTOR            ");
+        System.out.println("=============================================");
+
+        if (!gerenciarCriteriosFluxoAdotantes()) return;
+
+        String listagem = adotanteService.executarBuscaTutoresComCriterios(petService);
+        if ("VAZIO".equals(listagem)) {
+            ui.exibirMensagemErrorConsulta();
+            return;
+        }
+        ui.exibirListaTutores(listagem);
+
+        int numeroTutor = ui.numeroAdotanteListFiltrada();
+
+        String nomeTutor = adotanteService.obterNomeAdotantePorIndiceFiltrado(numeroTutor);
+        if ("INVALIDO".equals(nomeTutor)) {
+            ui.errorExibir("Número do tutor inválido.");
+            return;
+        }
+
+        String confirmacao = ui.confirmacaoDeletarTutor(nomeTutor);
+
+        if (confirmacao.equalsIgnoreCase("SIM")) {
+            Long idTutorDeletado = adotanteService.removerTutorEObterId(numeroTutor);
+
+            if (idTutorDeletado != null) {
+                petService.desvincularPetsDoTutor(idTutorDeletado);
+                ui.mensagemDeletarTutorSucesso();
+            } else {
+                ui.errorExibir("Erro ao processar a deleção do tutor.");
+            }
+        } else {
+            System.out.println("Operação cancelada.");
         }
     }
 

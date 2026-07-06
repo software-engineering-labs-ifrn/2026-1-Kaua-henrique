@@ -60,6 +60,10 @@ public interface InterfaceDeUsuario {
     String confirmacaoDeletarAdotante(String nomeAdotante);
     void mensagemDeletarAdotante();
     Long solicitarIdAdotante();
+
     Long solicitarIdPet();
+
     void exibirListaTutores(String listagem);
+    String confirmacaoDeletarTutor(String nomeTutor);
+    void mensagemDeletarTutorSucesso();
 }

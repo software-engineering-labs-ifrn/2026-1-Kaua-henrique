@@ -180,6 +180,28 @@ public class AdotanteService {
         return idsComPets;
     }
 
+    public String obterNomeAdotantePorIndiceFiltrado(int numeroTutor) {
+        int index = numeroTutor - 1;
+        if (index >= 0 && index < listaFiltrada.size()) {
+            return listaFiltrada.get(index).getNome();
+        }
+        return "INVALIDO";
+    }
+
+    public Long removerTutorEObterId(int numeroTutor) {
+        int index = numeroTutor - 1;
+        if (index >= 0 && index < listaFiltrada.size()) {
+            Adotante alvo = listaFiltrada.get(index);
+            Long idApanhado = alvo.getID();
+
+            adotanteRepository.deletar(alvo);
+            listaFiltrada.remove(index);
+
+            return idApanhado; // Retorna o ID puro
+        }
+        return null;
+    }
+
     // LISTAR TODOS OS ADOTANTES (Sem Pet)
     public String listarTodosAdotantesPuros(PetService petService) {
         List<Adotante> todos = adotanteRepository.listarTodos();
