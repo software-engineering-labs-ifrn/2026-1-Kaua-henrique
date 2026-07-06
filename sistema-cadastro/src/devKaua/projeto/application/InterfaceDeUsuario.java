@@ -27,18 +27,15 @@ public interface InterfaceDeUsuario {
     int solicitarOpcaoAlterar();
     void exibirMensagemAlteracaoConcluida();
     void exibirMensagemErrorConsulta();
-    void exibirPet(String petTexto);
+
     void errorExibir(String mensagem);
 
     int solicitarCriterioFiltro();
     String solicitarTextoBusca();
     int solicitarSexoParaFiltro();
     void exibirListaPets(String listaFormatada);
-    void erroSalvarArquivoPet();
-    void erroSalvarObjPet();
 
-    int solicitarTipoAnimalParaConsulta();
-    void leituraFormulario();
+    void erroSalvarObjPet();
 
     void exibirListaAdotantes(String listagem);
     int numeroAdotanteListFiltrada();

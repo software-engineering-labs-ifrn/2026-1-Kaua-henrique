@@ -1,4 +1,4 @@
-package devKaua.projeto.domain;
+package devKaua.projeto.application;
 public enum CriterioFiltro {
     NOME(1, "Nome ou Sobrenome"),
     IDADE(2, "Idade"),

@@ -1,4 +1,6 @@
-package devKaua.projeto.domain;
+package devKaua.projeto.application;
+
+import devKaua.projeto.domain.Pet;
 
 import java.util.ArrayList;
 import java.util.List;

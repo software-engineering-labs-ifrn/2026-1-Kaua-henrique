@@ -322,10 +322,6 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         System.out.println("Pets Cadastrados com base na sua consulta: \n" + listaFormatada);
     }
 
-    @Override
-    public void exibirPet(String petTexto) {
-        System.out.println(petTexto);
-    }
 
     @Override
     public void errorExibir(String mensagem) {
@@ -333,24 +329,12 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         System.out.println(mensagem);
     }
 
-    @Override
-    public void erroSalvarArquivoPet() {
-        System.out.println("Erro ao tentar salvar o arquivo.");
-    }
 
     @Override
     public void erroSalvarObjPet() {
         System.out.println("Erro ao tentar cadastrar novo Pet.");
     }
 
-    @Override
-    public int solicitarTipoAnimalParaConsulta() {
-        System.out.println("Escolha o tipo de animal:");
-        System.out.println("  1 = Cachorro\n  2 = Gato");
-        int resposta = this.scanner.nextInt();
-        this.scanner.nextLine();
-        return resposta;
-    }
 
     @Override
     public int solicitarTipoAnimalParaFiltro() {
@@ -359,19 +343,6 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         int resposta = this.scanner.nextInt();
         this.scanner.nextLine();
         return resposta;
-    }
-
-    @Override
-    public void leituraFormulario() {
-        File formulario = new File("sistema-cadastro/formulario/formulario.txt");
-        try (BufferedReader br = new BufferedReader(new FileReader(formulario))) {
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                System.out.println(linha);
-            }
-        } catch (IOException e) {
-            errorExibir(e.getMessage());
-        }
     }
 
     @Override

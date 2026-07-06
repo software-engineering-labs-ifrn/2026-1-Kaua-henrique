@@ -5,7 +5,6 @@ import devKaua.projeto.domain.Endereco;
 import devKaua.projeto.domain.Pet;
 import devKaua.projeto.domain.Tutor;
 import devKaua.projeto.infrastructure.AdotanteRepository;
-import devKaua.projeto.infrastructure.PetRepository;
 
 import java.util.*;
 
