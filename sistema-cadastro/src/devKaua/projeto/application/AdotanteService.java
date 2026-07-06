@@ -2,7 +2,11 @@ package devKaua.projeto.application;
 
 import devKaua.projeto.domain.Adotante;
 import devKaua.projeto.domain.Endereco;
+import devKaua.projeto.domain.Pet;
+import devKaua.projeto.domain.Tutor;
 import devKaua.projeto.infrastructure.AdotanteRepository;
+import devKaua.projeto.infrastructure.PetRepository;
+
 import java.util.*;
 
 public class AdotanteService {
@@ -110,6 +114,9 @@ public class AdotanteService {
         }
     }
 
+    public Optional<Adotante> buscarAdotantePorId(Long id) {
+        return adotanteRepository.buscarPorId(id);
+    }
     public String executarBuscaComCriteriosAtuais() {
         List<Adotante> todos = adotanteRepository.listarTodos();
         listaFiltrada.clear();
@@ -162,5 +169,98 @@ public class AdotanteService {
             // Limpa da lista filtrada local da sessão
             listaFiltrada.remove(adotanteSelecionado);
         }
+    }
+    private List<Long> obterIdsComPets(PetService petService) {
+        List<Long> idsComPets = new ArrayList<>();
+        for (Pet pet : petService.obterListaDeObjetosPets()) {
+            if (pet.getTutorId() != null && pet.getTutorId() > 0) {
+                idsComPets.add(pet.getTutorId());
+            }
+        }
+        return idsComPets;
+    }
+
+    // LISTAR TODOS OS ADOTANTES (Sem Pet)
+    public String listarTodosAdotantesPuros(PetService petService) {
+        List<Adotante> todos = adotanteRepository.listarTodos();
+        List<Long> idsTutores = obterIdsComPets(petService);
+        StringBuilder sb = new StringBuilder();
+        int contador = 1;
+
+        for (Adotante a : todos) {
+            if (!idsTutores.contains(a.getID())) {
+                sb.append("\n").append(contador++).append(a.toString());
+            }
+        }
+        return sb.isEmpty() ? "VAZIO" : sb.toString();
+    }
+
+    // LISTAR TODOS OS TUTORES (Com Pet)
+    public String listarTodosTutores(PetService petService) {
+        List<Adotante> todos = adotanteRepository.listarTodos();
+        List<Long> idsTutores = obterIdsComPets(petService);
+        StringBuilder sb = new StringBuilder();
+        int contador = 1;
+
+        for (Adotante a : todos) {
+            if (idsTutores.contains(a.getID())) {
+                Tutor tutor = Tutor.promoverAdotante(a);
+                for (Pet p : petService.obterListaDeObjetosPets()) {
+                    if (p.getTutorId() != null && p.getTutorId().equals(tutor.getID())) {
+                        tutor.adicionarPet(p);
+                    }
+                }
+                sb.append("\n").append(contador++).append(". ").append(tutor.toString()).append("\n-------------------");
+            }
+        }
+        return sb.isEmpty() ? "VAZIO" : sb.toString();
+    }
+
+    // BUSCA FILTRADA APENAS PARA TUTORES
+    public String executarBuscaTutoresComCriterios(PetService petService) {
+        List<Adotante> todos = adotanteRepository.listarTodos();
+        List<Long> idsTutores = obterIdsComPets(petService);
+        listaFiltrada.clear();
+
+        for (Adotante a : todos) {
+            // REGRA EXTRA: Precisa ser um tutor ativo
+            if (!idsTutores.contains(a.getID())) continue;
+
+            boolean atendeCriterios = true;
+
+            // Filtro por Nome (Opção 1)
+            if (criteriosAtivos.containsKey(1)) {
+                String buscaNome = criteriosAtivos.get(1).toLowerCase();
+                if (!a.getNome().toLowerCase().contains(buscaNome)) {
+                    atendeCriterios = false;
+                }
+            }
+
+            // Filtro por CPF (Opção 2)
+            if (criteriosAtivos.containsKey(2)) {
+                String buscaCpf = criteriosAtivos.get(2).replaceAll("\\D", "");
+                if (!a.getCpf().contains(buscaCpf)) {
+                    atendeCriterios = false;
+                }
+            }
+
+            if (atendeCriterios) {
+                listaFiltrada.add(a);
+            }
+        }
+
+        if (listaFiltrada.isEmpty()) return "VAZIO";
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < listaFiltrada.size(); i++) {
+            Tutor tutor = Tutor.promoverAdotante(listaFiltrada.get(i));
+            for (Pet p : petService.obterListaDeObjetosPets()) {
+                if (p.getTutorId() != null && p.getTutorId().equals(tutor.getID())) {
+                    tutor.adicionarPet(p);
+                }
+            }
+            sb.append("\n").append(i + 1).append(". ").append(tutor.toString()).append("\n-------------------");
+        }
+        return sb.toString();
     }
 }

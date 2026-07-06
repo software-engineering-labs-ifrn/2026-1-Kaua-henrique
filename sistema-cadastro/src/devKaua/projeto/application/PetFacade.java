@@ -29,6 +29,39 @@ public class PetFacade {
             case 1 -> cadastrarAdotante();
             case 2 -> alterarAdotante();
             case 3 -> removerAdotante();
+            case 4 -> listarTodosAdotantesPuros();
+            case 5 -> listarTodosTutores();
+            case 6 -> buscarTutoresPorCriterio();
+        }
+    }
+
+    private void listarTodosAdotantesPuros() {
+        String listagem = adotanteService.listarTodosAdotantesPuros(petService);
+        if ("VAZIO".equals(listagem)) {
+            ui.errorExibir("Nenhum adotante sem pet cadastrado no sistema.");
+        } else {
+            ui.exibirListaAdotantes(listagem);
+        }
+    }
+
+    private void listarTodosTutores() {
+        String listagem = adotanteService.listarTodosTutores(petService);
+        if ("VAZIO".equals(listagem)) {
+            ui.errorExibir("Nenhum tutor (adotante com pet) registrado no sistema.");
+        } else {
+            ui.exibirListaTutores(listagem);
+        }
+    }
+
+    private void buscarTutoresPorCriterio() {
+        // Reutiliza a UI de critérios que você já tem pronta!
+        if (!gerenciarCriteriosFluxoAdotantes()) return;
+
+        String listagem = adotanteService.executarBuscaTutoresComCriterios(petService);
+        if ("VAZIO".equals(listagem)) {
+            ui.exibirMensagemErrorConsulta();
+        } else {
+            ui.exibirListaTutores(listagem);
         }
     }
     public void cadastrarAdotante() {
@@ -49,6 +82,50 @@ public class PetFacade {
         }
     }
 
+    public void vincularPetAdotante() {
+        // --- PASSO 1: LOCALIZAR O ADOTANTE ---
+        System.out.println("\n=============================================");
+        System.out.println("   PASSO 1: LOCALIZAR O ADOTANTE DESEJADO   ");
+        System.out.println("=============================================");
+        if (!gerenciarCriteriosFluxoAdotantes()) {
+            System.out.println("Operação cancelada.");
+            return;
+        }
+
+        String listagemAdotantes = adotanteService.executarBuscaComCriteriosAtuais();
+        if ("VAZIO".equals(listagemAdotantes)) {
+            ui.exibirMensagemErrorConsulta();
+            return;
+        }
+        ui.exibirListaAdotantes(listagemAdotantes);
+        Long idAdotante = ui.solicitarIdAdotante();
+
+
+        System.out.println("\n=============================================");
+        System.out.println("     PASSO 2: LOCALIZAR O PET DESEJADO       ");
+        System.out.println("=============================================");
+        if (!gerenciarCriteriosFluxoPets()) {
+            System.out.println("Operação cancelada.");
+            return;
+        }
+
+        String listagemPets = petService.executarBuscaComCriteriosAtuais();
+        if ("VAZIO".equals(listagemPets)) {
+            ui.exibirMensagemErrorConsulta();
+            return;
+        }
+        ui.exibirListaPets(listagemPets);
+        Long idPet = ui.solicitarIdPet();
+
+        // --- PASSO 3: EXECUTAR VÍNCULO E VALIDAÇÕES ---
+        String resultado = petService.vincularTutorAoPet(idAdotante, idPet, adotanteService);
+
+        if ("SUCESSO".equals(resultado)) {
+            ui.exibirSucesso("Adotante promovido a Tutor e Pet vinculado com sucesso!");
+        } else {
+            ui.errorExibir(resultado);
+        }
+    }
     public void alterarAdotante() {
         // Usa o gerenciador de critérios específico para Adotantes
         if (!gerenciarCriteriosFluxoAdotantes()) return;

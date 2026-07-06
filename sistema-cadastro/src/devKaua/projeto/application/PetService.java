@@ -3,10 +3,7 @@ package devKaua.projeto.application;
 import devKaua.projeto.domain.*;
 import devKaua.projeto.infrastructure.PetRepository;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PetService {
     private final PetFiltro petFiltro;
@@ -31,6 +28,37 @@ public class PetService {
             return "SUCESSO";
         } catch (IllegalArgumentException e) {
             return e.getMessage();
+        }
+    }
+
+    public String vincularTutorAoPet(Long idAdotante, Long idPet, AdotanteService adotanteService) {
+        Optional<Adotante> adotanteOpt = adotanteService.buscarAdotantePorId(idAdotante);
+        if (adotanteOpt.isEmpty()) {
+            return "Operação Abortada: O ID do Adotante informado não existe no sistema.";
+        }
+        Adotante adotante = adotanteOpt.get();
+
+        Optional<Pet> petOpt = repository.buscarPorId(idPet);
+        if (petOpt.isEmpty()) {
+            return "Operação Abortada: O ID do Pet informado não existe no sistema.";
+        }
+        Pet pet = petOpt.get();
+
+        if (pet.getTutorId() != null && pet.getTutorId() > 0) {
+            return "Operação Abortada: Este animal já possui um tutor vinculado!";
+        }
+
+        try {
+            Tutor tutor = Tutor.promoverAdotante(adotante);
+            tutor.adicionarPet(pet);
+
+            pet.vincularTutor(idAdotante);
+
+            repository.atualizar(pet, "8 - " + idAdotante);
+            return "SUCESSO";
+
+        } catch (Exception e) {
+            return "Erro técnico ao tentar atualizar os arquivos: " + e.getMessage();
         }
     }
 
@@ -133,5 +161,9 @@ public class PetService {
             builder.append(++contador).append(" - ").append(pet.toString()).append("\n");
         }
         return builder.toString();
+    }
+
+    public List<Pet> obterListaDeObjetosPets() {
+        return repository.listarTodos(); // Retorna a lista de objetos, não a String!
     }
 }

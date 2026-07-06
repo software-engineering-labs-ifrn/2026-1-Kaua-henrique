@@ -18,11 +18,13 @@ public class Pet {
     private String idade;
     private String peso;
     private String raca;
+    private Long tutorId; // 🔄 NOVO ATRIBUTO: Guarda o ID do Adotante que virou Tutor
 
+    // --- Construtor para Reconstituição COMPLETA (Lendo do TXT com Tutor) ---
     public Pet(Long id, String nome, Endereco endereco, Sexo sexo,
-               TipoAnimal tipoAnimal, String idade, String peso, String raca) {
+               TipoAnimal tipoAnimal, String idade, String peso, String raca, Long tutorId) {
         if (id == null) {
-            throw new IllegalArgumentException("ID é obrigatório para reconstituição.");
+            throw new IllegalArgumentException("ID é obrigatório para reconstitution.");
         }
         this.id = id;
         setNome(nome);
@@ -32,6 +34,13 @@ public class Pet {
         this.endereco = endereco;
         this.sexo = sexo;
         this.tipoAnimal = tipoAnimal;
+        this.tutorId = tutorId; // Restaura o vínculo salvo
+    }
+
+    // --- Construtor antigo mantido para retrocompatibilidade se necessário ---
+    public Pet(Long id, String nome, Endereco endereco, Sexo sexo,
+               TipoAnimal tipoAnimal, String idade, String peso, String raca) {
+        this(id, nome, endereco, sexo, tipoAnimal, idade, peso, raca, null);
     }
 
     // --- Construtor privado para o Factory Method ---
@@ -45,6 +54,14 @@ public class Pet {
         this.endereco = endereco;
         this.sexo = sexo;
         this.tipoAnimal = tipoAnimal;
+        this.tutorId = null;
+    }
+
+    public void vincularTutor(Long idAdotante) {
+        if (idAdotante == null || idAdotante <= 0) {
+            throw new IllegalArgumentException("ID do tutor inválido para vinculação.");
+        }
+        this.tutorId = idAdotante;
     }
 
     public static Pet criar(String nome, Endereco endereco, Sexo sexo,
@@ -157,6 +174,10 @@ public class Pet {
         return raca;
     }
 
+    public Long getTutorId() {
+        return tutorId;
+    }
+
     public static void atualizarGerador(Long maiorIdEncontrado) {
         if (maiorIdEncontrado >= idGenerator.get()) {
             idGenerator.set(maiorIdEncontrado + 1);
@@ -167,6 +188,6 @@ public class Pet {
     public String toString() {
         return ". " + getID() + " - " + getNome() + " - " + getEndereco().toString()
                 + " - " + getTipoAnimal() + " - " + getSexo() + " - " + getIdade()
-                + " anos - " + getPeso() + "kg - " + getRaca();
+                + " anos - " + getPeso() + "kg - " + getRaca() +  " - " + getTutorId();
     }
 }

@@ -4,5 +4,6 @@ ID - 8
 3 - MACHO
 4 - Rua do ze, NÃO INFORMADO, Parnamirim
 5 - 9 anos
-6 - 10kg
+6 - 30kg
 7 - Viralata
+8 - 2

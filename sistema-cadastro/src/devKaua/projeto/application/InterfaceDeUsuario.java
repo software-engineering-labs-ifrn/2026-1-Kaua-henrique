@@ -59,4 +59,7 @@ public interface InterfaceDeUsuario {
     void exibirSucesso(String mensagem);
     String confirmacaoDeletarAdotante(String nomeAdotante);
     void mensagemDeletarAdotante();
+    Long solicitarIdAdotante();
+    Long solicitarIdPet();
+    void exibirListaTutores(String listagem);
 }

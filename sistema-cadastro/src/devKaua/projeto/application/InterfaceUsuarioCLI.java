@@ -15,14 +15,15 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
     @Override
     public void iniciarFluxoPrincipal(PetFacade facade) {
         int opcao = 0;
-        while (opcao != 3) {
+        while (opcao != 4) { // Agora sai com 4
             printMenuPrincipal();
             opcao = selecionarOpcao();
 
             switch (opcao) {
                 case 1 -> gerenciarMenuPets(facade);
                 case 2 -> gerenciarMenuPessoas(facade);
-                case 3 -> System.out.println("Sistema encerrado com sucesso. Até logo!");
+                case 3 -> facade.vincularPetAdotante();
+                case 4 -> System.out.println("Sistema encerrado com sucesso. Até logo!");
             }
         }
     }
@@ -49,8 +50,32 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         System.out.println("\n=== MENU PRINCIPAL ===");
         System.out.println("1: Gerenciar Pets");
         System.out.println("2: Gerenciar Pessoas (Adotantes/Tutores)");
-        System.out.println("3: Sair");
+        System.out.println("3: Vincular Adotante a um Pet (Promover a Tutor)");
+        System.out.println("4: Sair");
         System.out.println("======================");
+    }
+
+    @Override
+    public Long solicitarIdAdotante() {
+        System.out.print("Digite o ID do Adotante escolhido: ");
+        while (!scanner.hasNextLong()) {
+            System.out.print("ID inválido. Digite um número correspondente ao ID: ");
+            scanner.next();
+        }
+        Long id = scanner.nextLong();
+        scanner.nextLine();
+        return id;
+    }
+    @Override
+    public Long solicitarIdPet() {
+        System.out.print("Digite o ID do Pet a ser vinculado: ");
+        while (!scanner.hasNextLong()) {
+            System.out.print("ID inválido. Digite um número correspondente ao ID: ");
+            scanner.next();
+        }
+        Long id = scanner.nextLong();
+        scanner.nextLine();
+        return id;
     }
 
     @Override
@@ -70,8 +95,11 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
         System.out.println("\n--- SUBMENU: GERENCIAR PESSOAS ---");
         System.out.println("1: Cadastrar um novo adotante");
         System.out.println("2: Alterar os dados do adotante cadastrado");
-        System.out.println("3: Deletar um adotante cadastrado"); // Nova Opção!
-        System.out.println("4: Voltar ao Menu Principal");
+        System.out.println("3: Deletar um adotante cadastrado");
+        System.out.println("4: Listar todos os Adotantes (Sem pets)");
+        System.out.println("5: Listar todos os Tutores (Com pets)");
+        System.out.println("6: Filtrar/Buscar Tutores por critério");
+        System.out.println("7: Voltar ao Menu Principal");
         System.out.println("----------------------------------");
     }
 
@@ -90,15 +118,21 @@ public class InterfaceUsuarioCLI implements InterfaceDeUsuario {
 
     private void gerenciarMenuPessoas(PetFacade facade) {
         int opcaoSub = 0;
-        while (opcaoSub != 4) { // Sai com 4 agora
+        while (opcaoSub != 7) { // Sai com 7 agora
             printSubMenuPessoas();
             opcaoSub = selecionarOpcao();
-            if (opcaoSub >= 1 && opcaoSub <= 3) { // Aceita 1, 2 e 3
+            if (opcaoSub >= 1 && opcaoSub <= 6) {
                 facade.executarAcaoPessoa(opcaoSub);
-            } else if (opcaoSub != 4) {
+            } else if (opcaoSub != 7) {
                 System.out.println("Opção inválida para o menu de Pessoas.");
             }
         }
+    }
+
+    public void exibirListaTutores(String listagem) {
+        System.out.println("\n=== TUTORES ENCONTRADOS ===");
+        System.out.println(listagem);
+        System.out.println("===========================");
     }
 
 
