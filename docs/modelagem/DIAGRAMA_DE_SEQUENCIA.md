@@ -86,7 +86,6 @@ sequenceDiagram
     activate Pessoa
 %% Método void: finaliza e desativa sem seta de retorno
     deactivate Pessoa
-
 %% Fim do carregarDados (void): desativa sem seta de retorno
     deactivate AdotanteRepo
 
@@ -138,7 +137,7 @@ sequenceDiagram
         activate UI
         deactivate UI
     end
-
+    UI-->>Usuario: Apresenta o resultado visual na tela
     deactivate Facade
     deactivate UI
 ```
@@ -231,7 +230,7 @@ sequenceDiagram
     else Caso Contrario
         Facade->>UI: errorExibir(resultado)
     end
-
+    UI-->>Usuario: Apresenta o resultado visual na tela
     deactivate Facade
     deactivate UI
 ```
