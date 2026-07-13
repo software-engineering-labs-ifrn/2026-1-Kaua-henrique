@@ -235,3 +235,99 @@ sequenceDiagram
     deactivate Facade
     deactivate UI
 ```
+
+### SD-04: Consulta Dinâmica com Filtros Avançados de Pets
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario
+    participant UI as << Boundary >><br/>ui:InterfaceDeUsuario
+    participant Facade as << Control >><br/>PetFacade
+    participant Service as << Control >><br/>petService:PetService
+    participant Filtro as << Control >><br/>petFiltro:PetFiltro
+    participant Criterio as << Entity >><br/>CriterioFiltro
+    participant Repo as << Control >><br/>repository:PetRepository
+
+    Usuario->>UI: Solicita filtragem de Pets
+    activate UI
+    UI->>Facade: listarPetsPorCriterio()
+    activate Facade
+
+%% GERENCIAMENTO DE CRITÉRIOS
+    Note over Facade, UI: Loop de Configuração dos Critérios
+    Facade->>Service: limparCriterios()
+
+    Facade->>Service: obterCriteriosParaExibicao()
+    activate Service
+    Service-->>Facade: dadosExibicao (Map)
+    deactivate Service
+
+    Facade->>UI: solicitarAcaoGerenciamentoCriterios(dadosExibicao)
+    UI-->>Facade: acao (1 - Adicionar, 3 - Filtrar)
+
+    alt Acao = 1 (Adicionar Criterio)
+        Facade->>UI: solicitarCriterioFiltro()
+        UI-->>Facade: opcaoCrit
+        Facade->>UI: solicitarTextoBusca()
+        UI-->>Facade: valorRaw
+        Facade->>Service: adicionarCriterio(opcaoCrit, valorRaw)
+        activate Service
+        Service->>Criterio: fromValor(opcaoCrit)
+        activate Criterio
+        Criterio-->>Service: crit (Enum)
+        deactivate Criterio
+        Note over Service: Trata conversões se for SEXO ou TIPO<br/>e adiciona no mapa criteriosAtivos
+        deactivate Service
+    end
+
+%% EXECUÇÃO DA BUSCA FILTRADA
+    Note over Facade, Repo: --- Execução da Busca Dinâmica ---
+    Facade->>Service: executarBuscaComCriteriosAtuais()
+    activate Service
+
+    Service->>Repo: listarTodos()
+    activate Repo
+    Repo-->>Service: base (List<Pet>)
+    deactivate Repo
+
+    alt Se criteriosAtivos estiver vazio
+        Note over Service: resultado = base
+    else Possui critérios (criteriosAtivos.isEmpty() == false)
+        Service->>Filtro: filtrar(base, criteriosAtivos)
+        activate Filtro
+
+        loop Para cada Map.Entry no mapa de criterios
+            Filtro->>Filtro: filtrar(resultado, criterio, busca)
+            activate Filtro
+
+            loop Para cada Pet na lista
+                Filtro->>Filtro: extrairCampo(pet, criterio)
+                Note over Filtro: switch(criterio) para obter<br/>Nome, Idade, Raça, etc.
+                Filtro->>Filtro: corresponde(criterio, valorDoCampo, busca)
+                Note over Filtro: switch(criterio) com contains()<br/>ou equalsIgnoreCase()
+
+                alt Se corresponde == true
+                    Note over Filtro: Adiciona o pet na sublista resultado
+                end
+            end
+
+            deactivate Filtro
+        end
+
+        Filtro-->>Service: resultado (List<Pet>)
+        deactivate Filtro
+    end
+
+    alt Se resultado.isEmpty()
+        Service-->>Facade: "VAZIO"
+        Facade->>UI: exibirMensagemErrorConsulta()
+    else Caso contrário
+        Service->>Service: formatarListaParaTexto(resultado)
+        Service-->>Facade: listagem (String)
+        Facade->>UI: exibirListaPets(listagem)
+    end
+    deactivate Service
+    UI-->>Usuario: Apresenta o resultado visual na tela
+    deactivate Facade
+    deactivate UI
+```
