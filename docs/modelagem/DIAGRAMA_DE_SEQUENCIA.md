@@ -92,4 +92,53 @@ sequenceDiagram
 
     deactivate Main
 ```
+### SD-02: Fluxo Padrão de Cadastro e Persistência de Pets
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario
+    participant UI as << Boundary >><br/>ui:InterfaceDeUsuario
+    participant Facade as << Control >><br/>PetFacade
+    participant Service as << Control >><br/>petService:PetService
+    participant PetClass as << Entity >><br/>Pet (Classe)
+    participant Repo as << Control >><br/>repository:PetRepository
 
+    Usuario->>UI: Solicita cadastro e insere dados do Pet
+    activate UI
+
+    UI->>Facade: executarAcaoPet(1)
+    activate Facade
+    Facade->>Facade: cadastrarPet()
+
+    Facade->>Service: cadastrar(tipo, sexo, endArr, nome, raca, idade, peso)
+    activate Service
+
+    Note over Service: Bloco try { ... }
+    Service->>Service: Instancia TipoAnimal, Sexo e Endereco
+
+    Service->>PetClass: criar(nome, endereco, sexo, tipo, idade, peso, raca)
+    activate PetClass
+    Note over PetClass: Validações de Regex<br/>(Regras de Domínio)
+    PetClass-->>Service: Instância de novoPet
+    deactivate PetClass
+
+    Service->>Repo: salvar(novoPet)
+    activate Repo
+    Note over Repo: Escreve no arquivo físico<br/>via BufferedWriter
+    deactivate Repo
+
+    Service-->>Facade: Retorna "SUCESSO"
+    deactivate Service
+
+    alt Se resposta for "SUCESSO"
+        Note over Facade: Fluxo segue normalmente
+    else Se capturar IllegalArgumentException
+        Service-->>Facade: Retorna e.getMessage()
+        Facade->>UI: erroSalvarObjPet()
+        activate UI
+        deactivate UI
+    end
+
+    deactivate Facade
+    deactivate UI
+```
