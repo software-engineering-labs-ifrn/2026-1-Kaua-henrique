@@ -142,3 +142,96 @@ sequenceDiagram
     deactivate Facade
     deactivate UI
 ```
+
+### SD-03: Processo de Adoção (Vincular Tutor ao Pet)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario
+    participant UI as << Boundary >><br/>ui:InterfaceDeUsuario
+    participant Facade as << Control >><br/>PetFacade
+    participant AdotanteServ as << Control >><br/>adotanteService:AdotanteService
+    participant PetServ as << Control >><br/>petService:PetService
+    participant TutorClass as << Entity >><br/>Tutor (Classe)
+    participant PetClass as << Entity >><br/>pet:Pet (Instancia)
+    participant PetRepo as << Control >><br/>repository:PetRepository
+
+    Usuario->>UI: Escolhe a opcao de Vinculo / Adocao
+    activate UI
+    UI->>Facade: executarAcaoPessoa(opcao)
+    activate Facade
+
+    Facade->>Facade: vincularPetAdotante()
+
+%% PASSO 1: LOCALIZAR ADOTANTE
+    Note over Facade, AdotanteServ: --- PASSO 1: Localizar o Adotante Desejado ---
+    Facade->>Facade: gerenciarCriteriosFluxoAdotantes()
+    Facade->>AdotanteServ: executarBuscaComCriteriosAtuais()
+    activate AdotanteServ
+    AdotanteServ-->>Facade: listagemAdotantes (String)
+    deactivate AdotanteServ
+    Facade->>UI: exibirListaAdotantes(listagemAdotantes)
+    Facade->>UI: solicitarIdAdotante()
+    UI-->>Facade: idAdotante
+
+%% PASSO 2: LOCALIZAR PET
+    Note over Facade, PetServ: --- PASSO 2: Localizar o Pet Desejado ---
+    Facade->>Facade: gerenciarCriteriosFluxoPets()
+    Facade->>PetServ: executarBuscaComCriteriosAtuais()
+    activate PetServ
+    PetServ-->>Facade: listagemPets (String)
+    deactivate PetServ
+    Facade->>UI: exibirListaPets(listagemPets)
+    Facade->>UI: solicitarIdPet()
+    UI-->>Facade: idPet
+
+%% PASSO 3: EXECUTAR VÍNCULO E VALIDAÇÕES
+    Note over Facade, PetServ: --- PASSO 3: Executar Vinculo e Validacoes ---
+    Facade->>PetServ: vincularTutorAoPet(idAdotante, idPet, adotanteService)
+    activate PetServ
+
+    PetServ->>AdotanteServ: buscarAdotantePorId(idAdotante)
+    activate AdotanteServ
+    AdotanteServ-->>PetServ: Optional<Adotante>
+    deactivate AdotanteServ
+
+    PetServ->>PetRepo: buscarPorId(idPet)
+    activate PetRepo
+    PetRepo-->>PetServ: Optional<Pet>
+    deactivate PetRepo
+
+    alt Se Pet ja possuir tutor (pet.getTutorId() > 0)
+        PetServ-->>Facade: Retorna "Operação Abortada: Este animal já possui um tutor..."
+    else Caminho Feliz: Validacoes OK
+        PetServ->>TutorClass: promoverAdotante(adotante)
+        activate TutorClass
+        TutorClass-->>PetServ: tutor (Objeto)
+        deactivate TutorClass
+
+        PetServ->>TutorClass: adicionarPet(pet)
+        activate TutorClass
+        deactivate TutorClass
+
+        PetServ->>PetClass: vincularTutor(idAdotante)
+        activate PetClass
+        deactivate PetClass
+
+        PetServ->>PetRepo: atualizar(pet, "8 - " + idAdotante)
+        activate PetRepo
+        Note over PetRepo: Atualiza o arquivo físico txt
+        PetRepo-->>PetServ: true
+        deactivate PetRepo
+
+        PetServ-->>Facade: Retorna "SUCESSO"
+    end
+    deactivate PetServ
+
+    alt Se resultado for "SUCESSO"
+        Facade->>UI: exibirSucesso("Adotante promovido a Tutor e Pet vinculado...")
+    else Caso Contrario
+        Facade->>UI: errorExibir(resultado)
+    end
+
+    deactivate Facade
+    deactivate UI
+```
